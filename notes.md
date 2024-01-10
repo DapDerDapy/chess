@@ -34,4 +34,60 @@ public class SimpleJavaClass {
 
 ## Javadoc
 
-JDK documentation from Oracle
+JDK documentation from Oracle, available to use on the test!
+
+## Wrappers vs Primitive
+
+Byte and byte
+
+use the Wrapper to be able to manipulate and change between strings, ints, etc.
+
+## Strings
+
+**Strings are objects!**
+
+They are also immutable, meaning they cant be altered, to change a string, you must make
+a new one.
+
+```java
+String.format("%s %s", s1, s2); 
+//%s are placeholders for strings
+```
+
+Stringbuilder
+```java
+StringBuilder builder = new StringBuilder();
+builder.append("Using ");
+//.. the rest of the code
+```
+
+## Pointer stuff
+
+```java
+public static void main(String[] args){
+    Point t1 = new Point (10, 10);
+    Point br = new Point (20, 20);
+    Rectangle r = new Rectangle(t1, br);
+    int w = 5;
+    String text = args[0];
+    
+    boolean ok = drawRectangle(r, w, text);
+}
+
+
+public boolean drawRectangle (Rectangle rect, int width, String label){
+    
+}
+```
+
+## Arrays
+
+Hardcoding the values in:
+```java
+int [] myArray = {2, 5, 4, 1};
+```
+
+string array
+```java
+Stirng [] myStringArray = {"What", "is", "up"};
+```
