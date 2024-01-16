@@ -11,12 +11,12 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
-    private String pieceColorVar = "NULL";
-    private String pieceTypeVar = "NULL";
+    private final ChessGame.TeamColor pieceColor;
+    private final PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        pieceColorVar = pieceColor.toString();
-        pieceTypeVar = type.toString();
+        this.pieceColor = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -35,15 +35,16 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        //return
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
+        //throw new RuntimeException("Not implemented");
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
+        //throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -54,6 +55,9 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+
+
+
         return new ArrayList<>();
         //throw new RuntimeException("Not implemented");
     }
