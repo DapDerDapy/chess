@@ -1,7 +1,5 @@
 package chess;
 
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -82,10 +80,13 @@ public class ChessPiece {
                 ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
                 if (pieceAtNewPosition == null){
-                    System.out.println("{" + i + ", " + j + "}");
                     moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
-                }
-                else{
+
+                } else if (pieceAtNewPosition.pieceColor != this.pieceColor){
+                    moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
+                    break;
+
+                } else{
                     break;
                 }
             }
@@ -93,15 +94,17 @@ public class ChessPiece {
             // BOTTOM RIGHT
             for (int i = myPosition.getRow() - 1, j = myPosition.getColumn() + 1; i >= 1 && j <= 8; i--, j++){
 
-
                 ChessPosition newPosition = new ChessPosition(i, j);
                 ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
                 if (pieceAtNewPosition == null){
-                    System.out.println("{" + i + ", " + j + "}");
                     moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
-                }
-                else{
+
+                } else if (pieceAtNewPosition.pieceColor != this.pieceColor){
+                    moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
+                    break;
+
+                } else{
                     break;
                 }
             }
@@ -113,10 +116,13 @@ public class ChessPiece {
                 ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
                 if (pieceAtNewPosition == null){
-                    System.out.println("{" + i + ", " + j + "}");
                     moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
-                }
-                else{
+
+                } else if (pieceAtNewPosition.pieceColor != this.pieceColor){
+                    moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
+                    break;
+
+                } else{
                     break;
                 }
             }
@@ -124,20 +130,20 @@ public class ChessPiece {
             // TOP LEFT
             for (int i = myPosition.getRow() + 1, j = myPosition.getColumn() - 1; i <= 8 && j >= 1; i++, j--){
 
-
                 ChessPosition newPosition = new ChessPosition(i, j);
                 ChessPiece pieceAtNewPosition = board.getPiece(newPosition);
 
                 if (pieceAtNewPosition == null){
-                    System.out.println("{" + i + ", " + j + "}");
                     moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
-                }
-                else{
+
+                } else if (pieceAtNewPosition.pieceColor != this.pieceColor){
+                    moves.add(new ChessMove(myPosition, new ChessPosition(i, j), PieceType.BISHOP));
+                    break;
+
+                } else{
                     break;
                 }
             }
-
-            System.out.println(moves.toString());
             return moves;
         }
 

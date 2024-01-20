@@ -9,7 +9,7 @@ package chess;
 public class ChessBoard {
 
 
-    private final ChessPiece[][] grid = new ChessPiece[8][8];
+    private final ChessPiece[][] grid = new ChessPiece[9][9];
     public ChessBoard() {
 
     }
