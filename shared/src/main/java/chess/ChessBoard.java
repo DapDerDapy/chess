@@ -41,6 +41,18 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        int newRow;
+        int newCol;
+
+        ChessPosition newPosition;
+
+
+        // Add pawns to white
+        for (int i = 1; i <= 8; i++){
+            newPosition = new ChessPosition(2, i);
+            //addPiece(newPosition, PieceType.PAWN);
+        }
+
+
     }
 }
