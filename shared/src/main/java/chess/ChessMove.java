@@ -39,7 +39,7 @@ public class ChessMove {
 
     @Override
     public int hashCode() {
-            return Objects.hash(getStartPosition(), getEndPosition(), getPromotionPiece());
+        return Objects.hash(getStartPosition(), getEndPosition(), getPromotionPiece());
     }
 
     /**
