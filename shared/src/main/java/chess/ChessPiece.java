@@ -668,17 +668,15 @@ public class ChessPiece {
                     newPosition = new ChessPosition(pawnRow, pawnCol);
                     pieceAtNewPosition = board.getPiece(newPosition);
 
-                    if (pieceAtNewPosition == null) {
+                    if (pieceAtNewPosition == null && myPosition.getRow() !=7 ) {
                         moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), null));
+                    } else if (pieceAtNewPosition == null && myPosition.getRow() == 7){
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.ROOK));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.BISHOP));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.QUEEN));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.KNIGHT));
                     }
                 }
-
-                //if (myPosition.getRow() == 8 && pawnRow == 8){
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.BISHOP));
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.ROOK));
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.KNIGHT));
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.QUEEN));
-                //}
 
             }
 
@@ -694,7 +692,7 @@ public class ChessPiece {
 
 
                     if (pieceAtNewPosition != null){
-                        if (pieceAtNewPosition.pieceColor != this.pieceColor && myPosition.getRow() != 7){
+                        if (pieceAtNewPosition.pieceColor != this.pieceColor && myPosition.getRow() != 2){
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), null));
                         } else if (myPosition.getRow() == 2){
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.ROOK));
@@ -715,7 +713,7 @@ public class ChessPiece {
                     if (pieceAtNewPosition != null){
                         if (pieceAtNewPosition.pieceColor != this.pieceColor && myPosition.getRow() != 7){
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), null));
-                        } else if (myPosition.getRow() == 2){
+                        } else if (pawnRow == 2){
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.ROOK));
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.BISHOP));
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.QUEEN));
@@ -754,18 +752,15 @@ public class ChessPiece {
                     newPosition = new ChessPosition(pawnRow, pawnCol);
                     pieceAtNewPosition = board.getPiece(newPosition);
 
-                    if (pieceAtNewPosition == null) {
+                    if (pieceAtNewPosition == null && myPosition.getRow() !=2 ) {
                         moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), null));
+                    } else if (pieceAtNewPosition == null && myPosition.getRow() == 2){
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.ROOK));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.BISHOP));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.QUEEN));
+                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.KNIGHT));
                     }
                 }
-
-                //if (myPosition.getRow() == 1){
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.BISHOP));
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.ROOK));
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.KNIGHT));
-                //    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.QUEEN));
-                //}
-
             }
             return moves;
         }
