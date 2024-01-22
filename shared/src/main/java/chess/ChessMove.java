@@ -11,9 +11,8 @@ import java.util.Objects;
 public class ChessMove {
 
     private final ChessPosition startPosition;
-
     private final ChessPosition endPosition;
-    private final ChessPiece.PieceType promotionPiece;
+    private ChessPiece.PieceType promotionPiece = null;
 
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
@@ -26,6 +25,7 @@ public class ChessMove {
     /**
      * @return ChessPosition of starting location
      */
+
     public ChessPosition getStartPosition() {
         return startPosition;
     }
@@ -34,19 +34,12 @@ public class ChessMove {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ChessMove chessMove)) return false;
-
-        //if (getPromotionPiece() == null) {
-            return Objects.equals(getStartPosition(), chessMove.getStartPosition()) && Objects.equals(getEndPosition(), chessMove.getEndPosition());
-        //}
-        //return Objects.equals(getStartPosition(), chessMove.getStartPosition()) && Objects.equals(getEndPosition(), chessMove.getEndPosition()) && getPromotionPiece() == chessMove.getPromotionPiece();
+        return Objects.equals(getStartPosition(), chessMove.getStartPosition()) && Objects.equals(getEndPosition(), chessMove.getEndPosition()) && getPromotionPiece() == chessMove.getPromotionPiece();
     }
 
     @Override
     public int hashCode() {
-        //if(getPromotionPiece() == null){
-        return Objects.hash(getStartPosition(), getEndPosition());
-        //}
-        //return Objects.hash(getStartPosition(), getEndPosition(), getPromotionPiece());
+            return Objects.hash(getStartPosition(), getEndPosition(), getPromotionPiece());
     }
 
     /**
