@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
-    private final PieceType type;
+    private PieceType type;
 
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
@@ -664,7 +664,10 @@ public class ChessPiece {
                 }
 
                 if (myPosition.getRow() == 8){
-                    //promote the piece
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.BISHOP));
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.ROOK));
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.KNIGHT));
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.QUEEN));
                 }
 
             }
@@ -735,7 +738,10 @@ public class ChessPiece {
                 }
 
                 if (myPosition.getRow() == 1){
-                    //promote the piece
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.BISHOP));
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.ROOK));
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.KNIGHT));
+                    moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow,pawnCol), PieceType.QUEEN));
                 }
 
             }
