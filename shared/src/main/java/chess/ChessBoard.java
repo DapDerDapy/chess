@@ -9,8 +9,6 @@ import java.util.Arrays;
  * signature of the existing methods.
  */
 public class ChessBoard {
-
-
     private final ChessPiece[][] grid = new ChessPiece[9][9];
     public ChessBoard() {
 

@@ -25,11 +25,6 @@ public class ChessMove {
     /**
      * @return ChessPosition of starting location
      */
-
-    public ChessPosition getStartPosition() {
-        return startPosition;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -41,6 +36,13 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(getStartPosition(), getEndPosition(), getPromotionPiece());
     }
+
+
+    public ChessPosition getStartPosition() {
+        return startPosition;
+    }
+
+
 
     /**
      * @return ChessPosition of ending location
