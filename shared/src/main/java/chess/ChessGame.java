@@ -92,7 +92,24 @@ public class ChessGame {
 
         // hypothetically.... say the piece moved from its position?
         board.addPiece(startPosition, null);
+        board.addPiece(move.getEndPosition(), startPiece);
 
+        //let's find the king and get its position
+
+        for(int i = 1; i <= 8; i++){
+            for (int j = 1; j <= 8; j++){
+                ChessPosition possibleKingPosition = new ChessPosition(i, j);
+                ChessPiece possiblyKingPiece = board.getPiece(possibleKingPosition);
+
+                if (possiblyKingPiece.getPieceType() == ChessPiece.PieceType.KING &&
+                    possiblyKingPiece.getTeamColor() == startPiece.getTeamColor()){
+
+                    ChessPosition kingPosition = possibleKingPosition;
+                    ChessPiece kingPiece = possiblyKingPiece;
+                    break;
+                }
+            }
+        }
 
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
@@ -114,8 +131,13 @@ public class ChessGame {
                         // 2nd, check if the chess piece that WOULD theoretically check the king
                         // can take the opponent piece
 
-                        if (move.getEndPosition() == opponentPosition){
+                        // because the piece is null, create the temporary grid to have the piece in the
+                        // new location!!!!!!!!!!!!!!!!!!! Then just check if the king is in danger.
 
+                        // if the chessmove is the starting position of the piece that puts it in danger it's still
+                        // a valid move as long as there isn't another.
+
+                        if (move.getEndPosition() == opponentPosition){
 
 
                             // 3rd, check if taking that opponent piece STILL leaves the king exposed
