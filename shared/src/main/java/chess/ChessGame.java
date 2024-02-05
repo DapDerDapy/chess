@@ -135,7 +135,41 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece movingPiece = grid.getPiece(move.getStartPosition());
+        if (movingPiece == null) {
+            throw new InvalidMoveException("No piece at the starting position.");
+        }
+
+        // Check if the move is among the legal moves for the piece
+        Collection<ChessMove> legalMoves = movingPiece.pieceMoves(grid, move.getStartPosition());
+        if (!legalMoves.contains(move)) {
+            throw new InvalidMoveException("Move is not legal for the piece.");
+        }
+
+        // Simulate the move to check if it puts your own king in check
+        ChessPiece capturedPiece = grid.getPiece(move.getEndPosition()); // Save the captured piece if any
+        grid.addPiece(move.getEndPosition(), movingPiece); // Move the piece to the new position
+        grid.addPiece(move.getStartPosition(), null); // Remove the piece from the original position
+
+        if (isInCheck(movingPiece.getTeamColor())) {
+            // Undo the move if it puts your own king in check
+            grid.addPiece(move.getStartPosition(), movingPiece);
+            grid.addPiece(move.getEndPosition(), capturedPiece);
+            throw new InvalidMoveException("Move would put or leave your king in check.");
+        }
+
+        // After making the move, check for checkmate or stalemate against the opponent
+        TeamColor opponentColor = (movingPiece.getTeamColor() == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
+        if (isInCheckmate(opponentColor)) {
+            // Handle the checkmate scenario
+            // This could involve setting some state to end the game or notifying the players
+        } else if (isInStalemate(opponentColor)) {
+            // Handle the stalemate scenario
+            // Similar to checkmate, adjust the game state or notify players as necessary
+        }
+
+        // Optionally, here you would also switch turns between players
+        //throw new InvalidMoveException("Move would put or leave your king in check.");
     }
 
     /**
