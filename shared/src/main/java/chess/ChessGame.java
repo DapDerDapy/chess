@@ -11,11 +11,11 @@ import java.util.HashSet;
  */
 public class ChessGame {
 
-    private TeamColor teamTurn;
+    private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard grid;
 
     public ChessGame() {
-        this.teamTurn = TeamColor.WHITE;
+        //this.teamTurn = TeamColor.WHITE;
     }
 
     /**
@@ -172,21 +172,39 @@ public class ChessGame {
             throw new InvalidMoveException("No piece at the starting position.");
         }
 
-        // Check if the move is among the legal moves for the piece
-        Collection<ChessMove> legalMoves = movingPiece.pieceMoves(grid, move.getStartPosition());
+        // Ensure the move is legal
+        Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
+        //System.out.println(legalMoves.toString());
         if (!legalMoves.contains(move)) {
             throw new InvalidMoveException("Move is not legal for the piece.");
         }
 
-        // Check to make sure that it's the piece's turn
-        //if (getTeamTurn() != movingPiece.getTeamColor()){
-        //    throw new InvalidMoveException("Not piece's turn.");
-        //}
+        //System.out.println(movingPiece.getTeamColor().toString());
+        // Ensure it's the correct team's turn
+        if (movingPiece.getTeamColor() != (teamTurn)) {
+            throw new InvalidMoveException("It's not your turn.");
+        }
 
-        // Simulate the move to check if it puts your own king in check
+
+
+        // Directly check for pawn promotion before simulating any move.
+        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN &&
+                ((movingPiece.getTeamColor() == TeamColor.WHITE && move.getEndPosition().getRow() == 8) ||
+                        (movingPiece.getTeamColor() == TeamColor.BLACK && move.getEndPosition().getRow() == 1))) {
+            // Check for the promotion piece type in the move.
+            if (move.getPromotionPiece() != null) {
+                // Create and place the promotion piece at the destination.
+                movingPiece = new ChessPiece(movingPiece.getTeamColor(),move.getPromotionPiece());
+                // Note: At this point, movingPiece now refers to the promoted piece.
+            } else {
+                throw new InvalidMoveException("Promotion type must be specified for pawn promotion.");
+            }
+        }
+
+        // Now, simulate the move with the potentially new movingPiece (promoted piece if applicable).
         ChessPiece capturedPiece = grid.getPiece(move.getEndPosition()); // Save the captured piece if any
-        grid.addPiece(move.getEndPosition(), movingPiece); // Move the piece to the new position
         grid.addPiece(move.getStartPosition(), null); // Remove the piece from the original position
+        grid.addPiece(move.getEndPosition(), movingPiece);
 
         if (isInCheck(movingPiece.getTeamColor())) {
             // Undo the move if it puts your own king in check
@@ -205,8 +223,14 @@ public class ChessGame {
             // Similar to checkmate, adjust the game state or notify players as necessary
         }
 
+        if (teamTurn == TeamColor.WHITE){
+            teamTurn = TeamColor.BLACK;
+        } else if (teamTurn == TeamColor.BLACK){
+            teamTurn = TeamColor.WHITE;
+        }
         // Optionally, here you would also switch turns between players
         //throw new InvalidMoveException("Move would put or leave your king in check.");
+
     }
 
     /**
