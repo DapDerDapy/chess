@@ -665,17 +665,19 @@ public class ChessPiece {
                     pawnRow = myPosition.getRow() + 1;
                     pawnCol = myPosition.getColumn();
 
-                    newPosition = new ChessPosition(pawnRow, pawnCol);
-                    pieceAtNewPosition = board.getPiece(newPosition);
-
-                    if (pieceAtNewPosition == null && myPosition.getRow() !=7 ) {
-                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), null));
-                    } else if (pieceAtNewPosition == null && myPosition.getRow() == 7){
-                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.ROOK));
-                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.BISHOP));
-                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.QUEEN));
-                        moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.KNIGHT));
+                    if (pawnRow <= 8 && pawnRow >= 1 && pawnCol <=8 && pawnCol >= 1){
+                        newPosition = new ChessPosition(pawnRow, pawnCol);
+                        pieceAtNewPosition = board.getPiece(newPosition);
+                        if (pieceAtNewPosition == null && myPosition.getRow() !=7 ) {
+                            moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), null));
+                        } else if (pieceAtNewPosition == null && myPosition.getRow() == 7){
+                            moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.ROOK));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.BISHOP));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.QUEEN));
+                            moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.KNIGHT));
+                        }
                     }
+
                 }
 
             }

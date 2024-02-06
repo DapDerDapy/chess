@@ -58,7 +58,7 @@ public class ChessGame {
             return null;
         }
 
-        // Intialize parameter startPosition
+        // Initialize parameter startPosition
         ChessPiece piece = grid.getPiece(startPosition);
         Collection<ChessMove> potentialMoves = piece.pieceMoves(grid, startPosition);
 
@@ -86,6 +86,9 @@ public class ChessGame {
         //let's find the king and get its position
         ChessPosition kingPosition = findKingPosition(board, startPiece.getTeamColor());
 
+        // Special Bool for finding things
+        boolean takeDangerPiece = false;
+
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition opponentPosition = new ChessPosition(i, j);
@@ -99,6 +102,8 @@ public class ChessGame {
                     for (ChessMove oppMove : opponentMoves) {
                         if (oppMove.getEndPosition().equals(kingPosition)) {
                             if (move.getEndPosition().equals(opponentPosition)){
+                                // Not always going to be true
+                                //takeDangerPiece = true;
                                 return true;
                             }
                             // Undo the move before returning false.
@@ -112,6 +117,8 @@ public class ChessGame {
         }
 
         return true;
+
+        // Okay, so it shouldn't return prematurely
     }
 
     private ChessPosition findKingPosition(ChessBoard board, TeamColor teamColor) {
@@ -145,6 +152,11 @@ public class ChessGame {
         if (!legalMoves.contains(move)) {
             throw new InvalidMoveException("Move is not legal for the piece.");
         }
+
+        // Check to make sure that it's the piece's turn
+        //if (getTeamTurn() != movingPiece.getTeamColor()){
+        //    throw new InvalidMoveException("Not piece's turn.");
+        //}
 
         // Simulate the move to check if it puts your own king in check
         ChessPiece capturedPiece = grid.getPiece(move.getEndPosition()); // Save the captured piece if any
