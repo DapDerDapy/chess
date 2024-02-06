@@ -112,7 +112,7 @@ public class ChessGame {
             return true; // If no opponent moves can capture the king at the move's end position, the move is considered valid.
         }
 
-        // say the piece moved from it's current position?
+        // say the piece moved from its current position?
         board.addPiece(startPiecePosition, null);
         board.addPiece(move.getEndPosition(), startPiece);
 
@@ -175,7 +175,7 @@ public class ChessGame {
         // Ensure the move is legal
         Collection<ChessMove> legalMoves = validMoves(move.getStartPosition());
         //System.out.println(legalMoves.toString());
-        if (!legalMoves.contains(move)) {
+        if (!legalMoves.contains(move) && move.getPromotionPiece() == null) {
             throw new InvalidMoveException("Move is not legal for the piece.");
         }
 
@@ -194,7 +194,7 @@ public class ChessGame {
             // Check for the promotion piece type in the move.
             if (move.getPromotionPiece() != null) {
                 // Create and place the promotion piece at the destination.
-                movingPiece = new ChessPiece(movingPiece.getTeamColor(),move.getPromotionPiece());
+                movingPiece = new ChessPiece(movingPiece.getTeamColor(), move.getPromotionPiece());
                 // Note: At this point, movingPiece now refers to the promoted piece.
             } else {
                 throw new InvalidMoveException("Promotion type must be specified for pawn promotion.");
