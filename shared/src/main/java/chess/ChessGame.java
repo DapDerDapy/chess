@@ -80,14 +80,36 @@ public class ChessGame {
         ChessPiece startPiece = board.getPiece(startPiecePosition);
 
         // hypothetically.... say the piece moved from its position?
-        board.addPiece(startPosition, null);
-        board.addPiece(move.getEndPosition(), startPiece);
+        //board.addPiece(startPiecePosition, null);
+        //board.addPiece(move.getEndPosition(), startPiece);
 
         //let's find the king and get its position
         ChessPosition kingPosition = findKingPosition(board, startPiece.getTeamColor());
 
         // Special Bool for finding things
         boolean takeDangerPiece = false;
+
+        if (startPiece.getPieceType() == ChessPiece.PieceType.KING) {
+            for (int i = 1; i <= 8; i++) {
+                for (int j = 1; j <= 8; j++) {
+                    ChessPosition opponentPosition = new ChessPosition(i, j);
+                    ChessPiece opponentPiece = board.getPiece(opponentPosition);
+
+                    if (opponentPiece != null && opponentPiece.getTeamColor() != startPiece.getTeamColor()) {
+                        opponentMoves = opponentPiece.pieceMoves(board, opponentPosition);
+
+                        for (ChessMove againstKingMove : opponentMoves) {
+                            // Instead of comparing the entire move, compare just the end position to the king's intended end position.
+                            if (againstKingMove.getEndPosition().equals(move.getEndPosition())) {
+                                return false; // The king's move would place it in a position that can be captured.
+                            }
+                        }
+                    }
+                }
+            }
+            return true; // If no opponent moves can capture the king at the move's end position, the move is considered valid.
+        }
+
 
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
@@ -102,8 +124,6 @@ public class ChessGame {
                     for (ChessMove oppMove : opponentMoves) {
                         if (oppMove.getEndPosition().equals(kingPosition)) {
                             if (move.getEndPosition().equals(opponentPosition)){
-                                // Not always going to be true
-                                //takeDangerPiece = true;
                                 return true;
                             }
                             // Undo the move before returning false.

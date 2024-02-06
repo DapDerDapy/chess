@@ -677,9 +677,7 @@ public class ChessPiece {
                             moves.add(new ChessMove(myPosition, new ChessPosition(pawnRow, pawnCol), ChessPiece.PieceType.KNIGHT));
                         }
                     }
-
                 }
-
             }
 
             if (this.pieceColor.equals(ChessGame.TeamColor.BLACK)){
