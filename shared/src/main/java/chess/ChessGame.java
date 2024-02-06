@@ -78,16 +78,16 @@ public class ChessGame {
 
         ChessPosition startPiecePosition = new ChessPosition(startPosition.getRow(), startPosition.getColumn());
         ChessPiece startPiece = board.getPiece(startPiecePosition);
-
-        // hypothetically.... say the piece moved from its position?
-        //board.addPiece(startPiecePosition, null);
-        //board.addPiece(move.getEndPosition(), startPiece);
+        if (startPiece == null) {
+            // If there's no piece at the start position, the move cannot be valid.
+            return false; // Or consider throwing an IllegalArgumentException to indicate a bad input.
+        }
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece originalEndPositionPiece = board.getPiece(endPosition);
 
         //let's find the king and get its position
         ChessPosition kingPosition = findKingPosition(board, startPiece.getTeamColor());
 
-        // Special Bool for finding things
-        boolean takeDangerPiece = false;
 
         if (startPiece.getPieceType() == ChessPiece.PieceType.KING) {
             for (int i = 1; i <= 8; i++) {
@@ -97,7 +97,9 @@ public class ChessGame {
 
                     if (opponentPiece != null && opponentPiece.getTeamColor() != startPiece.getTeamColor()) {
                         opponentMoves = opponentPiece.pieceMoves(board, opponentPosition);
-
+                        if (move.getEndPosition().equals(opponentPosition)){
+                            return true; // it can overtake the piece that endangers it
+                        }
                         for (ChessMove againstKingMove : opponentMoves) {
                             // Instead of comparing the entire move, compare just the end position to the king's intended end position.
                             if (againstKingMove.getEndPosition().equals(move.getEndPosition())) {
@@ -110,35 +112,38 @@ public class ChessGame {
             return true; // If no opponent moves can capture the king at the move's end position, the move is considered valid.
         }
 
+        // say the piece moved from it's current position?
+        board.addPiece(startPiecePosition, null);
+        board.addPiece(move.getEndPosition(), startPiece);
 
+        // After the move, check if the king is in a position that can be captured by any opponent's piece
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition opponentPosition = new ChessPosition(i, j);
                 ChessPiece opponentPiece = board.getPiece(opponentPosition);
 
-                // If it's an opponent's piece.
                 if (opponentPiece != null && opponentPiece.getTeamColor() != startPiece.getTeamColor()) {
-                    opponentMoves = opponentPiece.pieceMoves(board, new ChessPosition(i, j));
+                    opponentMoves = opponentPiece.pieceMoves(board, opponentPosition);
 
-                    // Check if any of the opponent's moves target the king's position.
                     for (ChessMove oppMove : opponentMoves) {
                         if (oppMove.getEndPosition().equals(kingPosition)) {
-                            if (move.getEndPosition().equals(opponentPosition)){
-                                return true;
-                            }
-                            // Undo the move before returning false.
-                            board.addPiece(startPosition, startPiece); // Move back the start piece.
-                            board.addPiece(move.getEndPosition(), null); // Clear the end position.
-                            return false; // The move is not valid as it puts the king in check.
+                            // If any opponent's move can capture the king, the move is not valid
+                            // Undo the move before returning false
+                            board.addPiece(startPosition, startPiece); // Undo: Move back the start piece
+                            board.addPiece(endPosition, originalEndPositionPiece); // Restore the original piece at the end position, if any
+                            return false;
                         }
                     }
                 }
             }
         }
 
-        return true;
+        // Undo the temporary move after checking
+        board.addPiece(startPosition, startPiece); // Move back the start piece
+        board.addPiece(endPosition, originalEndPositionPiece); // Restore the original piece at the end position, if any
 
-        // Okay, so it shouldn't return prematurely
+        // If no opponent's move can capture the king after the move, it is considered valid
+        return true;
     }
 
     private ChessPosition findKingPosition(ChessBoard board, TeamColor teamColor) {
