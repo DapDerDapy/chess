@@ -223,6 +223,8 @@ public class ChessGame {
             // Similar to checkmate, adjust the game state or notify players as necessary
         }
 
+        // Switch the team turns
+        // There is definitely a 1 line of code version to do this...
         if (teamTurn == TeamColor.WHITE){
             teamTurn = TeamColor.BLACK;
         } else if (teamTurn == TeamColor.BLACK){
