@@ -89,5 +89,692 @@ int [] myArray = {2, 5, 4, 1};
 
 string array
 ```java
-Stirng [] myStringArray = {"What", "is", "up"};
+String [] myStringArray = {"What", "is", "up"};
 ```
+
+# 1/17/23
+## Objects, Classes, Packages, and Records
+
+### Chess stuff rq
+
+Move Calculator with head class
+```java
+pieceMoves(board: ChessBoard, position: ChessPosition): Collection<ChessMove>
+```
+
+Have this for a Pawn, King, Queen moves calculator etc.
+
+Right-click the chess folder and do run all tests for the pass-off
+
+**Package** 
+- just a folder
+- No imports necessary when things are in the same package
+
+**Collection**
+- Highest level base class of data structures in Java
+
+### Order of data structures
+- Collection
+  - List
+    - ArrayList
+    - LinkedList
+  - Set
+    - TreeSet
+    - HashSet
+
+
+**Java Class in Full Glory**
+
+```java
+package school;
+
+public enum YearInSchool{
+    FRESHMAN,
+    SOPHOMORE,
+    JUNIOR,
+    SENIOR,
+    GRADUATE
+}
+```
+```java
+package school;
+
+public class Person{
+    private String name;
+    private int age;
+    private YearInSchool year;
+    
+    public Person(String name, int age, YearInSchool year){
+        setnName(name);
+        setAge(age);
+        setYear(year);
+    }
+    
+    public Person(String name, int age){
+        this(name, age, YearInSchool.FRESHMAN);
+        // This calls the other constructor
+    }
+    
+    public String getName(){
+        return name;
+    }
+    
+    // rest of getters and setters ...
+    
+    @Override
+    public String toString(){
+        return String.format("Person(name=%s, age=%d, year=%s)", name, age, year);
+    }
+    
+    @Override
+    public boolean equals(Object o){
+        if (o == null){
+            return false;
+        }
+        if (o == this){
+            return true;
+        }
+        if (this.getClass() != o.getClass()){
+            return false;
+        }
+        
+        Person other = (Person)o;
+        
+        return (this.name.equals(other.name) && (this.age == other.age) && (this.year == other.year));
+    }
+    
+    // a hash table is really just an array
+    // returns an integer to decide which place it will be in the array
+  
+    @Override
+    public int hashCode(){
+        return (name.hashCode() + age + year.hashCode());
+    }
+    
+    public int getPriorit(){
+        return getCategoryPriority() * getAgePriority();
+    }
+    protected int getCategoryPriority(){ //protected, subclasses can see it, but not anybody outside the family
+        return 1;
+    }
+    protected int getAgePriority(){
+        return 1;
+    }
+}
+```
+```java
+private student (String name, int age, float gpa, YearInSchool year) {
+    super (name, age);
+    setGpa(gpa);
+    setYear(year);
+}
+
+@Override
+public String toString() {
+    return super.toString() + String.format(", gpa: %f, year: %s", gpa, year);
+}
+
+@Override
+public boolean equals(Object o){
+  if (!super.equals(o)){
+      return false;
+  }
+  
+  Student other = (Student)o;
+  
+  return (gpa == other.gpa && year == other.year);
+}
+
+@Override
+public int hashCode(){
+    
+    
+    int hash = super.hashCode();
+    return(hash ^ (int)gpa ^ year.hashCode());
+}
+
+@Override
+protected int getCategoryPriority(){
+    return 4;
+}
+
+@Override
+protected int getAgePriority(){
+    return (getAge() / 10);
+}
+```
+
+
+# 1/22/24
+
+## Creating an Interface
+
+```java
+public interface Moveable
+```
+
+If several classes implement the same method interface, what is the 
+likelihood that there is some duplicated code between them?
+
+Create an abstract class that contains the code shared by the subclasses!
+
+# 1/24/24
+
+### Shallow Copy vs Deep Copy
+
+- **Shallow copy** just copies the first level, so in a linked list, it would just
+take the first node.
+
+- **Deep copy** would copy everything
+
+* Immutable objects can be safely shared and don't need to be copies, like an "int"
+
+```java
+// Copy Constructor
+
+public class Person implements Cloneable{
+    
+    private int id;
+    private String name;
+    
+    public Person(int id, String name){
+        this.id = id;
+        this.name = name;
+    }
+    
+    public Person(person other){
+      setId(other.id);
+      setName(other.setName);
+    }
+  
+    @Override // Must override because Java assumes that things are not cloneable
+    public Person clone() {
+      return new Person(this);
+    }
+}
+
+
+// Takes in the parameters of the entire object itself
+// But it is not enough, you got to do the other stuff
+
+// Here is the parent class
+
+public Faculty(Faculty other) {
+    super(other);
+    
+    courses = new ArrayList<Course>();
+    for(Course c: other.courses){
+        courses.add(new Course(c));
+    }
+    
+    students = new ArrayList<Student>();
+    for (Student s : other.students) {
+        students.add(new Student(s));
+    }
+}
+```
+
+## Data Structures
+
+### Queue
+
+- *add(value)*
+- *peek()*
+- *remove()*
+
+- **Different thingies**
+  - ArrayDeque(fifo, resizable array impl)
+  - LinkedList(fifo, linked list implementation)
+  - PriorityQueue
+
+### Deque
+
+Allows for insertion and removal at both ends
+
+- addFirst(value), addLast(value)
+- peekFirst(), peekLast()
+
+### Stack
+
+Java's Stack class is deprecated, so don't use it!
+* Use a deque instead!
+
+### Map
+
+Collection of key value pairs
+
+- *put(key, value)*
+- *get(key)*
+- *contains(key)*
+- *remove(key)*
+- *keySet()*, returns set with all the keys in the map
+- *values()*, this is not a set, values don't have to be unique
+- *entrySet()*, gives you back the set of key value pairs! Best way to iterate over map
+
+## Iterating
+
+```java
+for (String w: words) {...}
+```
+
+So that goes through all of the stuff in words
+
+## Equality Checking
+
+default equals method compares references, but we would rather compare content!
+
+Overwrite equals with hashcode! remember to do it with
+i am using any of the collections implemented
+with hash tables
+
+
+### Sorted Collections
+
+```java
+import java.sql.Time;
+
+public class TimeOfDay implements Comparable<TimeOfDay>{
+    
+    private int hour;
+    private int minute;
+    
+    public TimeOfDay(){
+        setHour(0);
+        setMinutes(0);
+    }
+    
+    // getters and setters ........
+    
+    @Override
+    public int compareTo(TimeOfDay timeofDay){
+        
+        int result = Integer.compare(hour, timeofDay.hour);
+        if (result == 0){
+            result = Integer.compare(minute, timeOfDay.minute);
+        }
+        return result;
+    }
+}
+```
+
+## Exceptions
+
+In Java, you have to throw an **OBJECT**
+```java
+try{
+    // code that may throw an exception
+} catch(SomeExcetpionType ex){
+    // Code to hand the exception
+} //more catches and such
+```
+
+# 1/29/24
+
+## Software Design Principles
+
+My Code should:
+- **Work**
+- Be **easy** to **understand, debug**, and **maintain**
+- Hold up well under changes
+- Have **reusable components**
+
+### Decomposition
+
+- Decompose a program into classes
+- Use separate classes to represent each concept in the application domain
+- Identify relationships between classes
+  - Inheritance?
+  - Has-A vs Uses-A relationship?
+
+**Levels of decomposition**
+- system
+- subsystem
+- packages
+- classes
+- methods
+
+**Single Responsibility**
+- Each abstraction should have a single responsibility
+- Each class should represent one, well-defined concept
+
+**Good Naming**
+- get really good at picking good names, take it seriously
+- Classes are nouns. Variables are nouns. Methods are verbs!
+
+**Good algorithm and data structure selection!**
+- a flawed algorithm or data structure will mess stuff up like crazy!
+
+**Information hiding**
+- A class should hide its internal implementation as much as it can
+  - knowing the access levels of "public", "private", and "protected"
+- don't let details leak out of the class
+  - *ClassRoll* instead of *StudentLinkedList*
+
+**Avoid Code Duplication**
+- DRY principle: Don't repeat yourself
+- This should be ***STRENUOUSLY AVOIDED***
+
+### Writing Quality Code
+
+A singular method shouldn't be longer than a single sheet of paper.
+
+**Names**
+- if code gets too complicated, it will be harder to name!
+
+**Comments**
+- Make sure the code stays readable!
+- If too many comments are required, maybe consider further decomposition
+
+**Deep Nesting**
+- Excessive layers of nesting can make things very confusing!
+- Creating additional sub-methods may be the best way to remove deep nesting
+
+**Method Parameters**
+- Use all of the parameters
+- Don't make it have too many
+
+# 1/31/24
+
+In Intellij, under the "code" tab, go to "inspect code". Cool stuff!
+
+## Generic Types
+
+### Example of Generic class
+```java
+public class Pair<T, U> {
+    private T value1;
+    private U value2;
+}
+
+public Pair(T value1, U value2){
+    this.value1 = value1;
+    this.value2 = value2;
+}
+
+//... GETTERS AND SETTERS ...//
+
+```
+
+```java
+var pair1 = new Pair<String, Integer> {};// theres more lol
+```
+
+## Inner Classes
+
+the anonymous inner class is the most important one
+```java
+public Iterator iterator(final int increment) {
+    return new Iterator(){
+        
+        private int next = 0;
+        
+        public boolean hasNex() {
+            return (next <= SIZE - 1);
+        }
+        
+        //a few more
+    }; // <<<<<<--------- take a look at that semi colo lmaoooo raaaahhhh
+}
+```
+
+## Functional Interfaces
+
+### Lambda Functions
+
+- a block of code with the specification of any parameters that must be passed to it, 
+that can be stored in variables, passed as parameters, and executed later
+
+```java
+Arrays.sort(stringArray, (first, second) -> Integer.compare(first.length(), second.length()));
+```
+
+
+
+```java
+public class LambdaVariable{
+  Predicate<String> strLenPredicate = s -> s.length() > 10;
+}
+strLenPredicate(myString);
+```
+
+# 2/5/24
+
+## Chess Server Design
+
+There are clients and servers, pretty cool right?
+
+### Web API
+- A method to build distributive systems
+- the server has functions that it implements
+
+### Packages of classes for server
+
+#### Model
+- User
+- Auth Token
+- Game
+
+### Data Access
+- **Connects to model**
+- UserDao
+- AuthTokenDao
+- GameDao
+- **CRUD** operations
+  - create
+  - read
+  - update
+  - delete
+
+```java
+class UserDao{
+    void createUser(UserData user);
+    
+    UserData getUser(String username);
+    
+    void clear();
+}
+```
+
+On the other side.........
+
+### Server
+- Connects to
+  - **Handlers**
+    - register handler
+    - login handler
+    - clear handler
+    - join handler
+    - more...
+  - *Which all connect to*
+    - **Request/Result**
+      - Register request
+      - register result
+      - login request
+      - login result
+    - **Handlers also connect to**
+      - services which all have the same things as the others, but end in "service"
+      - The register service connect to **Data Access** and **Model** packages
+      - The services actually get stuff done, they implement the functions of the server
+      - Another thing: Object encoder / Decoders
+
+# 2/7/24
+
+## Javadoc
+
+```java
+/**
+ * Something cool
+ * @param coolThing important parameter!      
+ */
+```
+- use this before the method declaration to explain what it is.
+- tool > generate javadoc
+  - creates a cool website!
+
+### Streams vs Readers/Writers
+- reading **BINARY** versus **TEXTUAL** information
+
+### File
+- There is a file class so wrap the file path in the file object
+
+## JSON
+
+Simple data format that is based off of JavaScript that
+makes it easier to share data and use Object / Class relationships
+- It's essentially a textual format to represent a tree.
+
+*DOM* 
+- Document Object Model
+- Creates a tree
+- Used to read through JSON stuff
+
+### GSON
+```java
+private void generate (Catalog catalog, File file) throws IOException{
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    String jsonString = gson.toJson(catalog);
+    
+    //..... cool stuff here to read the file
+}
+```
+
+```java
+// Register a type adapter for the automobile interface
+GsonBuilder builder = newGsonBuilder();
+builder.registerTypeAdapter(Automobile.class, new AutomobileTypeAdapter());
+Gson gson = builder.create();
+```
+
+# 2/12/24
+
+## HTTP and cURL
+
+### HTTP
+
+HyperText Transport Protocol
+- Responses and Requests, constant communication between client and server
+- Headers: Metadata for requests and responses
+
+**GET** Request
+- gets whatever URL points at
+
+**POST** Request
+- server processes data
+
+### WEB APIs
+
+There are also **GET** requests in Web apis.
+- an API call which HTTP requests
+
+REQUEST TYPE (GET, POST, PUT, DELETE) -->  URL Path  -->  HTTP Version
+
+How clients can pass information via WEB apis to server:
+- URL, parameters
+- Headers
+- Request body
+
+### cURL
+
+command line tool
+
+# 2/14/24
+
+## Spark!
+
+```java
+import spark.Spark;
+
+public class SimplehelloBYUServer{
+    public static void main (String[] args) {
+        Spark.get("/hello", (req, res) -> "Hello BYU!");
+    }
+}
+```
+* listens on port 4567
+
+After running the server, go to cmd and type in 
+```cmd
+curl http://localhost:8080/hello
+```
+
+```java
+// matches "GET /hello/foo and "GET /hello/var"
+get("/hello/:name", (request, response) ->)
+    return "Hello: " + request.params(":name");
+```
+
+*SPLAT*
+```java
+// matches "GET / say/hello/to/world"
+// request.splat()[0] is 'hello' and
+// request.splat()[1] 'world'
+get ("/say/*/to/*", (request, response) ->
+//...
+```
+
+
+Start's in the public folder in the resources folder, with this:
+```java
+Spark.staticFiles.location("/public");
+```
+
+
+Adding spark to a project
+- project structure > modules > dependencies > search for spark java
+- You might have to add this text to the pom.xml as well
+```xml
+<depenency>
+  <groupId>com.sparkjava</groupId>
+  <artifactId>spark-core</artifactId>
+  <version>2.9.4</version>
+</depenency>
+```
+
+# 2/20/24
+
+## Server
+
+handler logic EXAMPLE
+```java
+LoginRequest request = (LoginRequest)gson.fromJson(reqData, LoginRequest.class);
+
+LoginService service = new LoginService();
+LoginResult result = service.login(request);
+
+return gson.toJson(result);
+```
+
+Generating authToken
+```java
+UUID.randomUUID().toString();
+```
+
+## Tests
+
+Create unit tests that will be cool and help test individual methods
+Have tests have a very similar layout or file path as the thing they are testing.
+- example test
+```java
+import org.junit.jupiter.api.Test;
+
+class SomeClassTest {
+ 
+  @Test
+  public void testSum_TwoPositive(){
+      
+      var someObject = new SomeClass();
+      
+      int x = 2;
+      int y = 100;
+      
+      int expected = 102;
+      
+      Assertions.assertEquals(expected, someObject.sum(x, y));
+  }
+}
+```
+
+To avoid code duplication, consider adding a "@BeforeEach" test to perhaps initialize
+the variables to the right things.
+
+- For the database tests, make sure to clear the database before each test
