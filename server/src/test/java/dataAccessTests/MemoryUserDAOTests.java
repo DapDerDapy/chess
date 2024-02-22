@@ -17,6 +17,9 @@ public class MemoryUserDAOTests {
         memoryUserDAO = new MemoryUserDAO();
     }
 
+    /**
+     * Add and Clear
+     */
     @Test
     void testClear() {
         // Add some dummy users to the DAO
