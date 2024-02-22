@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Collection;
 
 public class MemoryGameDAO implements GameDAO {
     private final List<GameData> gameInfo = new ArrayList<>();
@@ -24,5 +25,27 @@ public class MemoryGameDAO implements GameDAO {
     }
 
 
+    public Collection<GameData> listGames() {
+        return new ArrayList<>(gameInfo); // Return a copy of the gameInfo list
+    }
+
+    public boolean updateGame(int gameID, ChessGame updatedChessGame) {
+        for (int i = 0; i < gameInfo.size(); i++) {
+            GameData currentGame = gameInfo.get(i);
+            if (currentGame.id() == gameID) {
+                // Create a new GameData instance with the updated ChessGame
+                GameData updatedGame = new GameData(
+                        currentGame.id(),
+                        currentGame.blackUsername(),
+                        currentGame.whiteUsername(),
+                        currentGame.gameName(),
+                        updatedChessGame);
+                // Replace the old GameData with the updated one
+                gameInfo.set(i, updatedGame);
+                return true; // Update successful
+            }
+        }
+        return false; // GameID not found, update unsuccessful
+    }
 
 }
