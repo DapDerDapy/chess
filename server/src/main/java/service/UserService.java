@@ -10,8 +10,8 @@ import request.RegisterRequest;
 import result.RegisterResult;
 
 public class UserService {
-    private UserDAO userDAO;
-    private AuthDAO authDAO;
+    private final UserDAO userDAO;
+    private final AuthDAO authDAO;
 
     public UserService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
@@ -21,7 +21,7 @@ public class UserService {
     public RegisterResult register(RegisterRequest request) {
         // Check if user already exists
         if (userDAO.getUser(request.username()) != null) {
-            return new RegisterResult(false, "Username already exists.", null);
+            return new RegisterResult(false, "Username already exists.", null, request.username());
         }
         // Create new user
         UserData newUser = new UserData(request.username(), request.password(), request.email());
@@ -30,7 +30,7 @@ public class UserService {
         // Generate authToken for the new user
         String authToken = authDAO.createAuth(request.username());
 
-        return new RegisterResult(true, "User registered successfully.", authToken);
+        return new RegisterResult(true, "User registered successfully.", authToken, request.username());
     }
 
     public LoginResult login(LoginRequest request) throws AuthenticationException {

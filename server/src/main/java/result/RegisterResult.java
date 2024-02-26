@@ -1,3 +1,3 @@
 package result;
 
-public record RegisterResult(boolean success, String message, String authToken) {}
+public record RegisterResult(boolean success, String message, String authToken, String username) {}
