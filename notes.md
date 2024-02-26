@@ -778,3 +778,71 @@ To avoid code duplication, consider adding a "@BeforeEach" test to perhaps initi
 the variables to the right things.
 
 - For the database tests, make sure to clear the database before each test
+
+
+# 2/26/24
+
+#### Coverage
+
+- a way to measure the thoroughness of my tests, seeing how much code is actually tested per test
+- helpful to see what parts of your code still need to be tested
+
+## Relational Databases
+
+Programs can access a database through APIs such as JDBC.
+- Uses SQL to manipulate database.
+- Everything is sorted in rows.
+
+We are going to use ***MySQL***
+
+#### Relational Data Model
+- Class --> table
+- Object --> Row
+- Relationship(reference) -->Relationship (primary and foreign key)
+
+
+#### Object Relationships
+
+- One-to-One
+- One-to-Many
+- Many-to-Many
+
+## Structured Query Language (SQL)
+
+The world's most popular database manipulation language!
+
+- Each colum in an SQL table declares the type that column may contain
+- **Character strings**
+  - CHARACTER(n) or CHAR(n) -- fixed-width n-character string, padded with spaces as needed
+  - CHARACTER VARYING(n) or VARCHAR(n) -- variable-width string with a maxiumum size of *n* characters
+- **Numbers**
+  - INTEGER and SMALLINT
+  - FLOAT, REAL, and DOUBLE PRECISION
+  - NUMERIC(*precision, scale*) or DECIMAL(*precision, scale*)
+- **Large Objects**
+  - BLOB -- binary large object (images, sound, video, etc.)
+  - CLOB -- character large object (text documents)
+- **Date and Time**
+  - DATE
+  - TIME
+  - TIME WITH TIME ZONE or TIMEZ
+  - TIMESTAMP (DATE and TIME put together)
+  - TIMESTAMP WITH TIME ZONE or TIMESTAMPTZ 
+- **CREATE TABLE**
+  - Primary key
+  - null / not null
+  - Autoincrement
+  - Foreign keys
+
+```sql
+create table book (
+    id integer not null primary key auto_increment,
+    title varchar(255) not null,
+    author varchar(255) not null,
+    genre varchar(32) not null,
+  category_id integer not null,
+  foreign key(genre) references genre(genre),
+  
+)
+```
+
