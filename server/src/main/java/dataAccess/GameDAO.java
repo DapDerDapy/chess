@@ -14,4 +14,5 @@ public interface GameDAO {
 
     boolean updateGame(int gameID, ChessGame updatedChessGame);
 
+    void clearAll();
 }

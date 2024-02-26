@@ -48,4 +48,7 @@ public class MemoryGameDAO implements GameDAO {
         return false; // GameID not found, update unsuccessful
     }
 
+    public void clearAll(){
+        gameInfo.clear();
+    }
 }
