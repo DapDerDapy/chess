@@ -14,7 +14,7 @@ public class AdminService {
 
     public void clearApplicationData() {
         userDAO.clear();
-        //authDAO.deleteAuth();
+        authDAO.clearAll();
         // Clear other DAOs as needed
     }
 }
