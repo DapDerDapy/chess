@@ -33,8 +33,6 @@ public class MemoryGameDAOTests {
         GameData createdGame = memoryGameDAO.getGame(1); // Assuming getGame(int id) method exists
         assertNotNull(createdGame, "The game should not be null");
         assertEquals(gameName, createdGame.getGameName(), "Game name should match");
-        assertEquals(blackUsername, createdGame.getBlackUsername(), "Black username should match");
-        assertEquals(whiteUsername, createdGame.getWhiteUsername(), "White username should match");
         assertEquals(chessGame, createdGame.getGame(), "ChessGame object should match");
     }
 

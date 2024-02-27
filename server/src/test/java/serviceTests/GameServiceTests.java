@@ -192,4 +192,21 @@ public class GameServiceTests {
         assertTrue(result.success(), "Joining the game should be successful.");
         assertEquals("Successfully joined the game.", result.message(), "The success message should indicate successful game join.");
     }
+
+    @Test
+    public void testJoinGameInvalidAuthTokenThrowsException() {
+        // Arrange
+        String invalidToken = "invalidAuthToken";
+        int gameId = 1; // Example game ID
+        String color = "black";
+        JoinGameRequest request = new JoinGameRequest(gameId, color);
+
+        when(authDAO.isValidToken(invalidToken)).thenReturn(false); // Token is invalid
+
+        // Act and Assert
+        assertThrows(AuthenticationException.class, () -> {
+            gameService.joinGame(invalidToken, request);
+        }, "Should throw AuthenticationException when the auth token is invalid or expired.");
+    }
+
 }

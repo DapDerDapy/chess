@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import service.AdminService;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class AdminServiceTests {
@@ -40,5 +42,24 @@ public class AdminServiceTests {
         verify(authDAO, times(1)).clearAll();
         verify(gameDAO, times(1)).clearAll();
     }
+    @Test
+    void testClearApplicationData_WithDaoFailure() {
+        // Simulate a RuntimeException when attempting to clear user data
+        doThrow(new RuntimeException("Failed to clear user data")).when(userDAO).clear();
+
+        // Execute the clearApplicationData method
+        Exception exception = assertThrows(RuntimeException.class, () -> adminService.clearApplicationData());
+
+        // Verify the exception message
+        assertEquals("Failed to clear user data", exception.getMessage());
+
+        // Verify that the clear method was attempted on userDAO
+        verify(userDAO, times(1)).clear();
+
+        // Verify that the clearAll methods on authDAO and gameDAO were not called due to the failure in userDAO
+        verify(authDAO, never()).clearAll();
+        verify(gameDAO, never()).clearAll();
+    }
+
 }
 
