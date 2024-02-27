@@ -49,6 +49,9 @@ public class UserService {
         return new LoginResult(user.username(), authToken);
     }
 
+    public boolean logout(String authToken) {
+        // Delete the auth token
+        return authDAO.deleteAuth(authToken);
+    }
 
-    // Implement login and logout similarly...
 }

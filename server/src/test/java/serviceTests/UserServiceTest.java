@@ -109,5 +109,30 @@ public class UserServiceTest {
         });
     }
 
+    @Test
+    void testLogoutSuccess() {
+        // Arrange: Assume the authToken exists and can be invalidated
+        String testAuthToken = "testAuthToken";
+        when(authDAO.deleteAuth(testAuthToken)).thenReturn(true);
+
+        // Act: Attempt to log out
+        boolean logoutSuccess = userService.logout(testAuthToken);
+
+        // Assert: Verify that the logout was successful
+        assertTrue(logoutSuccess, "Logout should be successful when authToken exists and is invalidated.");
+    }
+
+    @Test
+    void testLogoutFailure() {
+        // Arrange: Assume the authToken does not exist or cannot be invalidated
+        String invalidAuthToken = "invalidAuthToken";
+        when(authDAO.deleteAuth(invalidAuthToken)).thenReturn(false);
+
+        // Act: Attempt to log out with an invalid token
+        boolean logoutSuccess = userService.logout(invalidAuthToken);
+
+        // Assert: Verify that the logout was unsuccessful
+        assertFalse(logoutSuccess, "Logout should fail when authToken does not exist or cannot be invalidated.");
+    }
 
 }

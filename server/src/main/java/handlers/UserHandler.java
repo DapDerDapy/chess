@@ -57,5 +57,27 @@ public class UserHandler {
         }
     }
 
-    // Additional handler methods for register, logout, etc.
+
+    public Object logoutUser(Request req, Response res) {
+        try {
+            // Extract the auth token from the request, e.g., from a header
+            String authToken = req.headers("Authorization");
+
+            // Perform the logout action
+            boolean success = userService.logout(authToken);
+
+            if (success) {
+                res.status(200); // OK
+                return gson.toJson(new SimpleResponse(true, "User successfully logged out."));
+            } else {
+                res.status(401); // Bad Request or consider 401/403 if appropriate
+                return gson.toJson(new SimpleResponse(false, "error: Failed to logout user."));
+            }
+
+
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return gson.toJson(new ErrorResponse(e.getMessage()));
+        }
+    }
 }
