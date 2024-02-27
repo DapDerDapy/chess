@@ -24,9 +24,9 @@ public class Server {
         AdminHandler AdminHandler = new AdminHandler(adminService);
 
         // Register endpoints
-        Spark.post("/login", userHandler::handleLogin);
-        Spark.post("/register", userHandler::registerUser);
-        Spark.delete("/delete", AdminHandler::clearApplicationData);
+        Spark.post("/session", userHandler::handleLogin);
+        Spark.post("/user", userHandler::registerUser);
+        Spark.delete("/db", AdminHandler::clearApplicationData);
 
         Spark.awaitInitialization();
         return Spark.port();

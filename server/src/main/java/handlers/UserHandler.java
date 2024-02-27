@@ -42,7 +42,9 @@ public class UserHandler {
             // Set response status based on the outcome of the registration attempt
             if (registerResult.success()) {
                 res.status(200); // HTTP OK
-            } else {
+            } else if(registerResult.toString().contains("error: Username already exists")){
+                res.status(403);
+            } else{
                 res.status(400); // Bad Request if registration fails
             }
 

@@ -21,8 +21,15 @@ public class UserService {
     public RegisterResult register(RegisterRequest request) {
         // Check if user already exists
         if (userDAO.getUser(request.username()) != null) {
-            return new RegisterResult(false, "Username already exists.", null, request.username());
+            return new RegisterResult(false, "error: Username already exists.", null, null);
         }
+
+        // Validate password
+        if (request.password() == null || request.password().isEmpty()) {
+            // Note: Adjust the message and details based on your error handling strategy
+            return new RegisterResult(false, "error: Password is required.", null, null);
+        }
+
         // Create new user
         UserData newUser = new UserData(request.username(), request.password(), request.email());
         userDAO.addUser(newUser);
@@ -36,7 +43,7 @@ public class UserService {
     public LoginResult login(LoginRequest request) throws AuthenticationException {
         UserData user = userDAO.getUser(request.username());
         if (user == null || !user.password().equals(request.password())) {
-            throw new AuthenticationException("Invalid username or password.");
+            throw new AuthenticationException("error: Invalid username or password.");
         }
         String authToken = authDAO.createAuth(user.username());
         return new LoginResult(user.username(), authToken);
