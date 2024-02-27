@@ -6,6 +6,7 @@ import chess.ChessGame;
 import model.GameData;
 import exceptions.AuthenticationException;
 import result.GameCreationResult;
+import java.util.Collection;
 
 public class GameService {
     private final GameDAO gameDAO;
@@ -39,6 +40,16 @@ public class GameService {
             // Log the exception or handle it as needed
             return new GameCreationResult(false, "Failed to create game due to an error: " + e.getMessage(), -1);
         }
+    }
+
+    public Collection<GameData> listGames(String authToken) throws AuthenticationException {
+        // Validate the authToken
+        if (!authDAO.isValidToken(authToken)) {
+            throw new AuthenticationException("Invalid or expired authToken.");
+        }
+
+        // Fetch and return all games from the DAO
+        return gameDAO.listGames();
     }
 
 }

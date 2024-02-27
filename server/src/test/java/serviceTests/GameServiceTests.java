@@ -12,6 +12,7 @@ import exceptions.AuthenticationException;
 import result.GameCreationResult;
 import service.GameService;
 import java.util.List;
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,4 +79,34 @@ public class GameServiceTests {
         // Verify that no game is created when authToken is invalid
         verify(gameDAO, never()).createGame(anyString(), anyString(), anyString(), any(ChessGame.class));
     }
+
+    @Test
+    void listGames_ValidToken_Success() throws AuthenticationException {
+        // Setup
+        String validToken = "validToken";
+        when(authDAO.isValidToken(validToken)).thenReturn(true);
+
+
+        int id = 123;
+        String blackUsername = "black";
+        String whiteUsername = "white";
+        String gameName = "game";
+        ChessGame chessGame = new ChessGame();
+
+        List<GameData> expectedGames = List.of(new GameData(id, blackUsername, whiteUsername, gameName, chessGame));
+        when(gameDAO.listGames()).thenReturn(expectedGames);
+
+        // Execute
+        Collection<GameData> actualGames = gameService.listGames(validToken);
+
+        // Verify
+        assertNotNull(actualGames);
+        assertEquals(expectedGames.size(), actualGames.size());
+        // Further assertions can be made here based on your GameData structure
+
+        // Verify interactions
+        verify(authDAO, times(1)).isValidToken(validToken);
+        verify(gameDAO, times(1)).listGames();
+    }
+
 }

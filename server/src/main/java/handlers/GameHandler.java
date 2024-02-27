@@ -11,6 +11,9 @@ import request.*;
 import chess.ChessGame;
 import exceptions.AuthenticationException;
 import model.GameData;
+import dataAccess.GameDAO;
+
+import java.util.Collection;
 
 public class GameHandler {
 
@@ -68,5 +71,33 @@ public class GameHandler {
         }
     }
 
+    public Object listGames(Request req, Response res) {
+        try {
+            String authToken = req.headers("Authorization");
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401); // Unauthorized
+                return gson.toJson(new SimpleResponse(false, "error: No authorization token provided."));
+            }
+
+            // Assuming you have an adminService or userService to check the auth token
+            if (!adminService.checkAuth(authToken)) {
+                res.status(401); // Unauthorized
+                return gson.toJson(new SimpleResponse(false, "error: Invalid or expired authorization token."));
+            }
+
+            // Fetch the list of games
+            Collection<GameData> games = gameService.listGames(authToken);
+            if (games.isEmpty()) {
+                res.status(200); // OK, but no games available
+                return gson.toJson(new SimpleResponse(true, "No games available."));
+            }
+
+            res.status(200); // OK
+            return gson.toJson(games); // Directly serialize the list of games to JSON
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return gson.toJson(new SimpleResponse(false, "An error occurred while listing the games: " + e.getMessage()));
+        }
+    }
 
 }

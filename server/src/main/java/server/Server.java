@@ -33,6 +33,7 @@ public class Server {
         Spark.delete("/db", AdminHandler::clearApplicationData);
         Spark.delete("/session", userHandler::logoutUser);
         Spark.post("/game", gameHandler::handleGameCreation);
+        Spark.get("/game", gameHandler::listGames);
 
         Spark.awaitInitialization();
         return Spark.port();
