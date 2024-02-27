@@ -199,7 +199,6 @@ public class StandardAPITests {
                 joinResult.message != null && joinResult.message.toLowerCase(Locale.ROOT).contains("error"),
                 "Result returned an error message");
 
-
         TestModels.TestListResult listResult = serverFacade.listGames(loginTwo.authToken);
         Assertions.assertEquals(HttpURLConnection.HTTP_OK, serverFacade.getStatusCode(),
                 "Server response code was not 200 OK");

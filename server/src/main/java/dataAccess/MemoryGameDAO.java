@@ -79,8 +79,7 @@ public class MemoryGameDAO implements GameDAO {
         return false;
     }
 
-    public Collection<GameData> listGames() {
-
+    public ArrayList<GameData> listGames() {
         return new ArrayList<>(gameInfo); // Return a copy of the gameInfo list
     }
 

@@ -14,6 +14,8 @@ import exceptions.AuthenticationException;
 import result.*;
 import request.*;
 import service.GameService;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 
@@ -91,28 +93,67 @@ public class GameServiceTests {
         String validToken = "validToken";
         when(authDAO.isValidToken(validToken)).thenReturn(true);
 
-
         int id = 123;
         String blackUsername = "black";
         String whiteUsername = "white";
         String gameName = "game";
         ChessGame chessGame = new ChessGame();
 
-        List<GameData> expectedGames = List.of(new GameData(id, blackUsername, whiteUsername, gameName, chessGame));
+        // Use a generic Collection type or a List without casting to ArrayList
+        Collection<GameData> expectedGames = List.of(new GameData(id, blackUsername, whiteUsername, gameName, chessGame));
         when(gameDAO.listGames()).thenReturn(expectedGames);
 
         // Execute
         Collection<GameData> actualGames = gameService.listGames(validToken);
 
         // Verify
-        assertNotNull(actualGames);
-        assertEquals(expectedGames.size(), actualGames.size());
-        // Further assertions can be made here based on your GameData structure
+        System.out.println(expectedGames);
+        assertNotNull(actualGames, "The actual games collection should not be null.");
+        assertEquals(expectedGames.size(), actualGames.size(), "The number of games should match the expected size.");
+
+        // Use more detailed assertions to compare the contents of the collections if necessary
+        // This might include iterating through the collections and comparing individual GameData objects
 
         // Verify interactions
         verify(authDAO, times(1)).isValidToken(validToken);
         verify(gameDAO, times(1)).listGames();
     }
+
+    @Test
+    void listGames_MultipleGames_ValidToken_Success() throws AuthenticationException {
+        // Setup
+        String validToken = "validToken";
+        when(authDAO.isValidToken(validToken)).thenReturn(true);
+
+        // Create multiple game data objects
+        GameData game1 = new GameData(1, "blackPlayer1", "whitePlayer1", "Game One", new ChessGame());
+        GameData game2 = new GameData(2, "blackPlayer2", "whitePlayer2", "Game Two", new ChessGame());
+        GameData game3 = new GameData(3, "blackPlayer3", "whitePlayer3", "Game Three", new ChessGame());
+
+
+        // Prepare expected games list
+        Collection<GameData> expectedGames = List.of(game1, game2, game3);
+        when(gameDAO.listGames()).thenReturn(expectedGames);
+
+
+        // Execute
+        Collection<GameData> actualGames = gameService.listGames(validToken);
+
+        // Verify
+        assertNotNull(actualGames, "The actual games collection should not be null.");
+        assertEquals(expectedGames.size(), actualGames.size(), "The size of the actual games collection should match the expected games.");
+
+        // Optional: More detailed assertions to check if all expected games are present in the actual list
+        assertTrue(actualGames.containsAll(expectedGames), "The actual games list should contain all the expected games.");
+
+        System.out.println(expectedGames);
+        System.out.println(actualGames);
+        // Verify interactions
+        verify(authDAO, times(1)).isValidToken(validToken);
+        verify(gameDAO, times(1)).listGames();
+    }
+
+
     @Test
     public void testJoinGameColorAlreadyTakenThrowsException() {
         // Arrange

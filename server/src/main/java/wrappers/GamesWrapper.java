@@ -3,7 +3,7 @@ import model.GameData;
 import java.util.Collection;
 
 public class GamesWrapper {
-    private final Collection<GameData> games;
+    private Collection<GameData> games;
 
     public GamesWrapper(Collection<GameData> games) {
         this.games = games;
@@ -12,5 +12,10 @@ public class GamesWrapper {
     // Getter
     public Collection<GameData> getGames() {
         return games;
+    }
+
+    // Setter
+    public void setGames(Collection<GameData> games) {
+        this.games = games;
     }
 }

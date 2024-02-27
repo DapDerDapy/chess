@@ -14,7 +14,6 @@ import java.util.Collection;
 public class GameService {
     private final GameDAO gameDAO;
     private final AuthDAO authDAO;
-
     private final UserDAO userDAO;
 
     public GameService(GameDAO gameDAO, AuthDAO authDAO, UserDAO userDAO) {
@@ -58,7 +57,6 @@ public class GameService {
         // Fetch and return all games from the DAO
         return gameDAO.listGames();
     }
-
 
     public JoinGameResult joinGame(String authToken, JoinGameRequest request) throws AuthenticationException, AlreadyTakenException {
         // Validate the authToken
