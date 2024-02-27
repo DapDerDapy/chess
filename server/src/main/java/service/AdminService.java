@@ -20,4 +20,8 @@ public class AdminService {
         authDAO.clearAll();
         gameDAO.clearAll();
     }
+
+    public boolean checkAuth(String authToken){
+        return authDAO.isValidToken(authToken);
+    }
 }
