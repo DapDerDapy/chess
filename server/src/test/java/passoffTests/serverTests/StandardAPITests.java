@@ -209,7 +209,6 @@ public class StandardAPITests {
         Assertions.assertEquals(existingUser.username, listResult.games[0].whiteUsername);
     }
 
-
     @Test
     @Order(6)
     @DisplayName("Normal User Registration")
@@ -513,6 +512,9 @@ public class StandardAPITests {
 
         TestModels.TestListResult listResult = serverFacade.listGames(existingAuth);
 
+        System.out.println(listResult.games);
+
+        System.out.println("hello?");
         Assertions.assertEquals(1, listResult.games.length);
         Assertions.assertEquals(existingUser.username, listResult.games[0].whiteUsername);
         Assertions.assertNull(listResult.games[0].blackUsername);
@@ -729,7 +731,6 @@ public class StandardAPITests {
         //check
         Assertions.assertEquals(expectedList, returnedList, "Returned Games list was incorrect");
     }
-
 
     @Test
     @Order(23)

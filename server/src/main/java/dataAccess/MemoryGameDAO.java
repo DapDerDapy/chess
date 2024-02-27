@@ -28,12 +28,12 @@ public class MemoryGameDAO implements GameDAO {
 
     public boolean isColorTaken(int gameID, String color) {
         for (GameData game : gameInfo) {
-            if (game.id() == gameID) { // Assuming GameData has a getter for gameId
-                if ("black".equals(color)) {
-                    if (game.blackUsername() != null)
+            if (game.getGameID() == gameID) { // Assuming GameData has a getter for gameId
+                if ("BLACK".equals(color)) {
+                    if (game.getBlackUsername() != null)
                         return true;
-                } else if ("white".equals(color)) {
-                    if (game.whiteUsername() != null)
+                } else if ("WHITE".equals(color)) {
+                    if (game.getWhiteUsername() != null)
                         return true;
                     //return game.whiteUsername() != null;
                 }
@@ -46,7 +46,7 @@ public class MemoryGameDAO implements GameDAO {
 
     public GameData getGame(int gameID) {
         Optional<GameData> match = gameInfo.stream()
-                .filter(game -> game.id() == gameID)
+                .filter(game -> game.getGameID() == gameID)
                 .findFirst();
         return match.orElse(null);
     }
@@ -62,11 +62,13 @@ public class MemoryGameDAO implements GameDAO {
         synchronized (game) { // Ensure thread safety if needed
             if (color != null && !color.isEmpty()) {
                 // Trying to join as a player
-                  if (game.blackUsername() == null && color.equals("BLACK")) {
-                    return true;
+                  if (game.getBlackUsername() == null && color.equals("BLACK")) {
+                        game.setBlackUsername(username);
+                        return true;
                   }
-                  if (game.whiteUsername() == null && color.equals("WHITE")) {
-                    return true;
+                  if (game.getWhiteUsername() == null && color.equals("WHITE")) {
+                      game.setWhiteUsername(username);
+                      return true;
                   }
             } else if (isColorTaken(gameID, color)) {
                 return false;
@@ -86,13 +88,13 @@ public class MemoryGameDAO implements GameDAO {
     public boolean updateGame(int gameID, ChessGame updatedChessGame) {
         for (int i = 0; i < gameInfo.size(); i++) {
             GameData currentGame = gameInfo.get(i);
-            if (currentGame.id() == gameID) {
+            if (currentGame.getGameID() == gameID) {
                 // Create a new GameData instance with the updated ChessGame
                 GameData updatedGame = new GameData(
-                        currentGame.id(),
-                        currentGame.blackUsername(),
-                        currentGame.whiteUsername(),
-                        currentGame.gameName(),
+                        currentGame.getGameID(),
+                        currentGame.getBlackUsername(),
+                        currentGame.getWhiteUsername(),
+                        currentGame.getGameName(),
                         updatedChessGame);
                 // Replace the old GameData with the updated one
                 gameInfo.set(i, updatedGame);

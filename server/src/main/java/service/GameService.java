@@ -65,13 +65,13 @@ public class GameService {
         }
 
         // Check if the color is already taken
-        boolean colorTaken = gameDAO.isColorTaken(request.gameID(), request.color());
+        boolean colorTaken = gameDAO.isColorTaken(request.gameID(), request.playerColor());
         if (colorTaken) {
-            throw new AlreadyTakenException("Color already taken.");
+            throw new AlreadyTakenException("error: Color already taken.");
         }
 
         // Proceed to attempt to join the game
-        boolean joined = gameDAO.joinGame(request.gameID(), request.color(), authToken, authDAO.getUsernameFromToken(authToken));
+        boolean joined = gameDAO.joinGame(request.gameID(), request.playerColor(), authToken, authDAO.getUsernameFromToken(authToken));
         if (joined) {
             return new JoinGameResult(true, "Successfully joined the game.");
         } else {

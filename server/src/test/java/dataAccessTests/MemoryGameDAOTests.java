@@ -32,10 +32,10 @@ public class MemoryGameDAOTests {
         // Then
         GameData createdGame = memoryGameDAO.getGame(1); // Assuming getGame(int id) method exists
         assertNotNull(createdGame, "The game should not be null");
-        assertEquals(gameName, createdGame.gameName(), "Game name should match");
-        assertEquals(blackUsername, createdGame.blackUsername(), "Black username should match");
-        assertEquals(whiteUsername, createdGame.whiteUsername(), "White username should match");
-        assertEquals(chessGame, createdGame.game(), "ChessGame object should match");
+        assertEquals(gameName, createdGame.getGameName(), "Game name should match");
+        assertEquals(blackUsername, createdGame.getBlackUsername(), "Black username should match");
+        assertEquals(whiteUsername, createdGame.getWhiteUsername(), "White username should match");
+        assertEquals(chessGame, createdGame.getGame(), "ChessGame object should match");
     }
 
     @Test
@@ -82,7 +82,7 @@ public class MemoryGameDAOTests {
         // Retrieve the updated game and verify its ChessGame state
         GameData updatedGame = memoryGameDAO.getGame(gameId);
         assertNotNull(updatedGame, "Updated game should not be null");
-        assertEquals(updatedChessGame, updatedGame.game(), "The ChessGame state should be updated");
+        assertEquals(updatedChessGame, updatedGame.getGame(), "The ChessGame state should be updated");
 
         // Verify update fails for a non-existent game
         assertFalse(memoryGameDAO.updateGame(999, updatedChessGame), "Update should fail for a non-existent game");

@@ -108,6 +108,7 @@ public class GameServiceTests {
 
         // Verify
         System.out.println(expectedGames);
+        System.out.println(actualGames);
         assertNotNull(actualGames, "The actual games collection should not be null.");
         assertEquals(expectedGames.size(), actualGames.size(), "The number of games should match the expected size.");
 

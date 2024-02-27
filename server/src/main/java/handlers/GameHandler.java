@@ -86,12 +86,12 @@ public class GameHandler {
             }
 
             Collection<GameData> games = gameService.listGames(authToken);
-            if (games.isEmpty()) {
-                res.status(200); // OK, but no games available
-                return gson.toJson(new SimpleResponse(true, "No games available."));
-            }
+            //if (games.isEmpty()) {
+            //    res.status(200); // OK, but no games available
+            //    return gson.toJson(new SimpleResponse(true, "No games available."));
+            //}
 
-            // Wrap the games list into the GamesWrapper
+            // Wrap the games list into the GamesWrapper, something is wrong with Gson conversion things?
             GamesWrapper wrapper = new GamesWrapper(games);
             // Serialize the wrapper to JSON, which will include the "games" root element
             String jsonOutput = gson.toJson(wrapper);
@@ -119,7 +119,7 @@ public class GameHandler {
             if (joinResult.success()) {
                 res.status(200); // Success
                 return gson.toJson(joinResult); // Assuming joinResult includes the necessary success message
-            } else if (joinResult.message().equals("Color already taken.")){
+            } else if (joinResult.message().equals("error: Color already taken.")){
                 res.status(403); // Forbidden
                 return gson.toJson(new SimpleResponse(false, "Error: already taken"));
             } else {
