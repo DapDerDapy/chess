@@ -3,13 +3,16 @@ package serviceTests;
 import chess.ChessGame;
 import dataAccess.AuthDAO;
 import dataAccess.GameDAO;
+import dataAccess.UserDAO;
+import exceptions.AlreadyTakenException;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import exceptions.AuthenticationException;
-import result.GameCreationResult;
+import result.*;
+import request.*;
 import service.GameService;
 import java.util.List;
 import java.util.Collection;
@@ -28,10 +31,12 @@ public class GameServiceTests {
 
     private GameService gameService;
 
+    private UserDAO userDAO;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        gameService = new GameService(gameDAO, authDAO);
+        gameService = new GameService(gameDAO, authDAO, userDAO);
     }
 
     @Test
@@ -108,5 +113,41 @@ public class GameServiceTests {
         verify(authDAO, times(1)).isValidToken(validToken);
         verify(gameDAO, times(1)).listGames();
     }
+    @Test
+    public void testJoinGameColorAlreadyTakenThrowsException() {
+        // Arrange
+        String validToken = "validAuthToken";
+        int gameId = 1; // Example game ID
+        String color = "black";
+        JoinGameRequest request = new JoinGameRequest(gameId, color);
 
+        when(authDAO.isValidToken(validToken)).thenReturn(true);
+        when(authDAO.getUsernameFromToken(validToken)).thenReturn("testUser");
+        when(gameDAO.isColorTaken(gameId, color)).thenReturn(true);
+
+        // Act and Assert
+        assertThrows(AlreadyTakenException.class, () -> {
+            gameService.joinGame(validToken, request);
+        }, "Should throw AlreadyTakenException when the color is already taken.");
+    }
+    @Test
+    public void testJoinGameSuccess() throws AuthenticationException, AlreadyTakenException {
+        // Arrange
+        String validToken = "validAuthToken";
+        int gameId = 1; // Example game ID
+        String color = "black"; // Assuming 'black' is not already taken
+        JoinGameRequest request = new JoinGameRequest(gameId, color);
+
+        when(authDAO.isValidToken(validToken)).thenReturn(true);
+        when(authDAO.getUsernameFromToken(validToken)).thenReturn("testUser");
+        when(gameDAO.isColorTaken(gameId, color)).thenReturn(false); // Color is not taken
+        when(gameDAO.joinGame(gameId, color, validToken, "testUser")).thenReturn(true); // Simulate successful join
+
+        // Act
+        JoinGameResult result = gameService.joinGame(validToken, request);
+
+        // Assert
+        assertTrue(result.success(), "Joining the game should be successful.");
+        assertEquals("Successfully joined the game.", result.message(), "The success message should indicate successful game join.");
+    }
 }

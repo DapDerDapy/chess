@@ -24,4 +24,9 @@ public class AdminService {
     public boolean checkAuth(String authToken){
         return authDAO.isValidToken(authToken);
     }
+
+    public String getUsernameByToken(String authToken) {
+        // Placeholder for actual implementation
+        return null;
+    }
 }

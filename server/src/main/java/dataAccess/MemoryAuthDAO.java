@@ -34,6 +34,12 @@ public class MemoryAuthDAO implements AuthDAO {
         return authTokens.containsKey(authToken);
     }
 
+    public String getUsernameFromToken(String authToken){
+        // Retrieve and return the username associated with the authToken
+        // Returns null if the authToken does not exist in the map
+        return authTokens.get(authToken);
+    }
+
     public void clearAll(){
         authTokens.clear();
     }

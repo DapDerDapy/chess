@@ -9,9 +9,10 @@ import service.UserService;
 import result.*;
 import request.*;
 import chess.ChessGame;
-import exceptions.AuthenticationException;
+import exceptions.*;
 import model.GameData;
 import dataAccess.GameDAO;
+import wrappers.*;
 
 import java.util.Collection;
 
@@ -79,25 +80,61 @@ public class GameHandler {
                 return gson.toJson(new SimpleResponse(false, "error: No authorization token provided."));
             }
 
-            // Assuming you have an adminService or userService to check the auth token
             if (!adminService.checkAuth(authToken)) {
                 res.status(401); // Unauthorized
                 return gson.toJson(new SimpleResponse(false, "error: Invalid or expired authorization token."));
             }
 
-            // Fetch the list of games
             Collection<GameData> games = gameService.listGames(authToken);
             if (games.isEmpty()) {
                 res.status(200); // OK, but no games available
                 return gson.toJson(new SimpleResponse(true, "No games available."));
             }
 
+            // Wrap the games list into the GamesWrapper
+            GamesWrapper wrapper = new GamesWrapper(games);
+            // Serialize the wrapper to JSON, which will include the "games" root element
+            String jsonOutput = gson.toJson(wrapper);
+
             res.status(200); // OK
-            return gson.toJson(games); // Directly serialize the list of games to JSON
+            return jsonOutput; // Return the serialized JSON of the wrapped games
         } catch (Exception e) {
             res.status(500); // Internal Server Error
             return gson.toJson(new SimpleResponse(false, "An error occurred while listing the games: " + e.getMessage()));
         }
     }
 
+
+    public Object joinGameHandler(Request req, Response res) throws AuthenticationException, AlreadyTakenException{
+        try {
+            String authToken = req.headers("Authorization");
+            if (authToken == null || authToken.isEmpty()) {
+                res.status(401); // Unauthorized
+                return gson.toJson(new SimpleResponse(false, "Error: No authorization token provided."));
+            }
+
+            JoinGameRequest joinRequest = gson.fromJson(req.body(), JoinGameRequest.class);
+            JoinGameResult joinResult = gameService.joinGame(authToken, joinRequest);
+
+            if (joinResult.success()) {
+                res.status(200); // Success
+                return gson.toJson(joinResult); // Assuming joinResult includes the necessary success message
+            } else if (joinResult.message().equals("Color already taken.")){
+                res.status(403); // Forbidden
+                return gson.toJson(new SimpleResponse(false, "Error: already taken"));
+            } else {
+                res.status(400); // Bad Request
+                return gson.toJson(new SimpleResponse(false, "Error: bad request"));
+            }
+        } catch (AuthenticationException e) {
+            res.status(401); // Unauthorized
+            return gson.toJson(new SimpleResponse(false, "Error: unauthorized"));
+        } catch (AlreadyTakenException e) {
+            res.status(403); // Forbidden
+            return gson.toJson(new SimpleResponse(false, e.getMessage())); // Use the exception's message
+        } catch (Exception e) {
+            res.status(500); // Internal Server Error
+            return gson.toJson(new SimpleResponse(false, "Error: " + e.getMessage()));
+        }
+    }
 }

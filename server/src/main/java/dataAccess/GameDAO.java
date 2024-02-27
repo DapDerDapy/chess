@@ -14,5 +14,9 @@ public interface GameDAO {
 
     boolean updateGame(int gameID, ChessGame updatedChessGame);
 
+    boolean joinGame(int gameID, String color, String authToken, String username);
+
+    boolean isColorTaken(int gameID, String color);
+
     void clearAll();
 }

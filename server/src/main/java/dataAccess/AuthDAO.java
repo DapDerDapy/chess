@@ -6,5 +6,6 @@ public interface AuthDAO {
     boolean deleteAuth(String authToken);
     boolean isValidToken(String authToken);
 
+    String getUsernameFromToken(String authToken);
     void clearAll();
 }

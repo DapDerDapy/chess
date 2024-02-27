@@ -24,7 +24,7 @@ public class Server {
         AdminService adminService = new AdminService(userDAO, authDAO, gameDAO);
         AdminHandler AdminHandler = new AdminHandler(adminService);
 
-        GameService gameService = new GameService(gameDAO, authDAO);
+        GameService gameService = new GameService(gameDAO, authDAO, userDAO);
         GameHandler gameHandler = new GameHandler(gameService, userService, adminService);
 
         // Register endpoints
@@ -34,6 +34,7 @@ public class Server {
         Spark.delete("/session", userHandler::logoutUser);
         Spark.post("/game", gameHandler::handleGameCreation);
         Spark.get("/game", gameHandler::listGames);
+        Spark.put("/game", gameHandler::joinGameHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
