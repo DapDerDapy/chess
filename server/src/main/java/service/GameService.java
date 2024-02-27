@@ -5,6 +5,7 @@ import dataAccess.AuthDAO;
 import chess.ChessGame;
 import model.GameData;
 import exceptions.AuthenticationException;
+import result.GameCreationResult;
 
 public class GameService {
     private final GameDAO gameDAO;
@@ -15,24 +16,29 @@ public class GameService {
         this.authDAO = authDAO;
     }
 
-    public GameData createGame(String authToken, String gameName, String blackUsername, String whiteUsername, ChessGame chessGame) throws AuthenticationException {
+    public GameCreationResult createGame(String authToken, String gameName, String blackUsername, String whiteUsername, ChessGame chessGame) throws AuthenticationException {
         // Validate the authToken
         if (!authDAO.isValidToken(authToken)) {
             throw new AuthenticationException("Invalid or expired authToken.");
         }
 
-        // Proceed with game creation
-        gameDAO.createGame(gameName, blackUsername, whiteUsername, chessGame);
+        try {
+            // Proceed with game creation
+            int gameId = 0;
+            gameId = gameDAO.createGame(gameName, blackUsername, whiteUsername, chessGame);
 
-        // Assuming you want to return the newly created game details
-        // This step might involve fetching the game by some unique attribute (e.g., name and usernames)
-        // For simplicity, let's assume gameName is unique and use it to find the game
-        // Note: This is a simplification. In a real scenario, you'd need a robust way to fetch the newly created game
-        return gameDAO.listGames().stream()
-                .filter(game -> game.gameName().equals(gameName) &&
-                        game.blackUsername().equals(blackUsername) &&
-                        game.whiteUsername().equals(whiteUsername))
-                .findFirst()
-                .orElse(null);
+            // Assuming createGame returns the game ID on success
+            if (gameId > 0) {
+                return new GameCreationResult(true, "Game created successfully", gameId);
+            } else {
+                // If gameId <= 0, it indicates failure (based on our assumption)
+                return new GameCreationResult(false, "Failed to create game", -1);
+            }
+        } catch (Exception e) {
+            // If there's an exception, consider it a failure to create the game
+            // Log the exception or handle it as needed
+            return new GameCreationResult(false, "Failed to create game due to an error: " + e.getMessage(), -1);
+        }
     }
+
 }

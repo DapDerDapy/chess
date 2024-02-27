@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import exceptions.AuthenticationException;
+import result.GameCreationResult;
 import service.GameService;
 import java.util.List;
 
@@ -43,23 +44,24 @@ public class GameServiceTests {
 
         when(authDAO.isValidToken(authToken)).thenReturn(true);
 
-        // You might need to adjust this stubbing based on your actual method signatures and return types
-        GameData expectedGameData = new GameData(1, blackUsername, whiteUsername, gameName, chessGame);
-        when(gameDAO.listGames()).thenReturn(List.of(expectedGameData));
+        // Assuming gameDAO.createGame now returns the ID of the created game
+        // Let's say the game ID of the newly created game is 1
+        int expectedGameId = 1;
+        when(gameDAO.createGame(anyString(), anyString(), anyString(), any())).thenReturn(expectedGameId);
 
         // Execute
-        GameData resultGameData = gameService.createGame(authToken, gameName, blackUsername, whiteUsername, chessGame);
+        GameCreationResult result = gameService.createGame(authToken, gameName, blackUsername, whiteUsername, chessGame);
 
-        // Verify
-        assertNotNull(resultGameData);
-        assertEquals(gameName, resultGameData.gameName());
-        assertEquals(blackUsername, resultGameData.blackUsername());
-        assertEquals(whiteUsername, resultGameData.whiteUsername());
+        // Verify the result
+        assertNotNull(result, "The result should not be null.");
+        assertTrue(result.success(), "Game creation should be successful.");
+        assertEquals(expectedGameId, result.gameID(), "The game ID should match the expected value.");
 
-        // Verify interactions
+        // Verify that the methods were called as expected
         verify(authDAO, times(1)).isValidToken(authToken);
-        verify(gameDAO, times(1)).createGame(gameName, blackUsername, whiteUsername, chessGame);
+        verify(gameDAO, times(1)).createGame(eq(gameName), eq(blackUsername), eq(whiteUsername), eq(chessGame));
     }
+
 
     @Test
     void testCreateGameWithInvalidToken() {

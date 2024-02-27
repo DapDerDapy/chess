@@ -11,10 +11,11 @@ public class MemoryGameDAO implements GameDAO {
     private final List<GameData> gameInfo = new ArrayList<>();
     private final AtomicInteger gameIdCounter = new AtomicInteger();
 
-    public void createGame(String gameName, String blackUsername, String whiteUsername, ChessGame chessGame){
+    public int createGame(String gameName, String blackUsername, String whiteUsername, ChessGame chessGame){
         int gameId = gameIdCounter.incrementAndGet();
         GameData newGame = new GameData(gameId, blackUsername, whiteUsername, gameName, chessGame);
         gameInfo.add(newGame);
+        return gameId;
     }
 
     public GameData getGame(int gameID) {

@@ -43,27 +43,30 @@ public class GameHandler {
             }
 
             GameCreationRequest gameCreationRequest = gson.fromJson(req.body(), GameCreationRequest.class);
+            ChessGame chessGame = new ChessGame(); // Adjust based on your ChessGame class constructor
 
-            // Properly instantiate ChessGame
-            // This example assumes a default constructor sets up a new game.
-            ChessGame chessGame = new ChessGame(); // Ensure this matches your ChessGame class' constructor
-
-            // Now passing authToken as the first parameter
-            GameData createdGame = gameService.createGame(authToken, gameCreationRequest.gameName(),
+            GameCreationResult createdGame = gameService.createGame(authToken, gameCreationRequest.gameName(),
                     gameCreationRequest.blackUsername(), gameCreationRequest.whiteUsername(), chessGame);
 
-            if (createdGame != null) {
+            if (createdGame.success()) {
                 res.status(200); // OK
-                return gson.toJson(new GameCreationResult(true, "Game created successfully", createdGame.id()));
+                // Directly return the createdGame as it already contains the necessary information
+                return gson.toJson(createdGame);
             } else {
-                // Assuming failure due to invalid request parameters, as authentication has already been checked.
                 res.status(400); // Bad Request
                 return gson.toJson(new SimpleResponse(false, "error: Failed to create game. Check request parameters."));
             }
+        } catch (AuthenticationException e) {
+            res.status(401); // Unauthorized
+            return gson.toJson(new SimpleResponse(false, "Authentication error: " + e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            res.status(400); // Bad Request
+            return gson.toJson(new SimpleResponse(false, "Invalid parameters: " + e.getMessage()));
         } catch (Exception e) {
             res.status(500); // Internal Server Error
-            return gson.toJson(new SimpleResponse(false, "An error occurred while creating the game."));
+            return gson.toJson(new SimpleResponse(false, "An error occurred while creating the game: " + e.getMessage()));
         }
     }
+
 
 }
