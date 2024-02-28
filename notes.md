@@ -837,12 +837,164 @@ The world's most popular database manipulation language!
 ```sql
 create table book (
     id integer not null primary key auto_increment,
-    title varchar(255) not null,
-    author varchar(255) not null,
-    genre varchar(32) not null,
-  category_id integer not null,
-  foreign key(genre) references genre(genre),
-  
+    title varchar(255) not null, 
+    author varchar(255) not null, 
+    genre varchar(32) not null, 
+    category_id integer not null, 
+    foreign key(genre) references genre(genre),
+    foreign key(category_id) references category(id)
 )
 ```
 
+# 2/28/24
+
+### SQL stuff
+
+- sql is not case sensitive, so do whatever you want with capital letters haha
+
+Dropping a table?
+```sql
+drop table if exists book;
+```
+
+insert a row into a table?
+```sql
+insert into book
+(title, author, genre, category_id) values ('The Work' 
+' and the Glory', 'Gerald Lunc', 'HistoricalFIction', 3);
+```
+
+update table?
+```sql
+UPDATE member
+Set name = 'Chris Jones',
+    email_address = 'chris@gmail.com'
+WHERE id = 3
+```
+
+delete rows from a table?
+```sql
+DELETE FROM member
+WHERE id = 3
+```
+```sql
+DELETE FROM books_read
+WHERE member_id = 3
+```
+this one works like clear for the whole row
+```sql
+DELETE FROM book
+```
+
+Queries (complicated)
+```sql
+SELECT Column, Column, Column
+FROM Table, Table
+WHERE Condition
+```
+
+List all books using SELECT
+```sql
+SELECT * FROM book
+```
+
+list the authors and the titles of all non-fiction books
+```sql
+SELECT author, title
+FROM book
+WHERE genre = "NonFiction"
+```
+
+List the sub-categories of category 'Top'
+```sql
+SELECT id, name, parent_id
+FROM category
+WHERE parent_id = 1
+```
+
+Queries - Join
+```sql
+SELECT member.name, book.title
+FROM member, books_read, book
+WHERE member.id = books_read.member_id AND 
+      book.id = books_read.book_id
+```
+
+```sql
+SELECT member.name, book.title
+FROM member
+INNER JOIN books_read ON member.id = books_read.member_id
+INNER JOIN book ON books_read.book_id = book.id
+WHERE gner = "NonFiction"
+```
+
+### Java Database Access with JDBC
+
+Open a Database Connection / Start a transaction
+
+```java
+import java.sql.*;
+// ...... \\
+String connectionURL = "jdbc:mysql://localhost:3306/BookClub?" + 
+    "user=user&password=mypassword";
+
+Connection connection = null;
+try(Connection c = DriverManager.getConnection(connectionURL)) {
+    connection = c;
+    
+    //Start a transaction
+    connection.setAutoCommit(false);
+} catch (SQLExcetpion ex) {
+    
+}
+```
+
+Execute a query
+```java
+
+List<Book> books = new ArrayList<>();
+
+String sql = "select id, title, author, genre, category_id from book";
+
+try (PreparedStatement stmt = conneciton.prepareStatement(sql);
+    ResultSet rs = stmt.executeQuery())  {
+    while(rs.next()){
+        int id = rs.getInt(1);
+        String title = rs.getString(2);
+        String author = rs.getSring(3);
+        String genre = rs.getSTring(4);
+        int categoryId = rs.getInt(5);
+        books.add(new Book(id, title, authro genre, categoryId));
+        }
+    catch(SQLException ex) {
+        // Error message;
+    }
+}
+```
+
+Execute an insert, update, or delete
+
+```java
+
+String sql = "update book " + "set title = ?, author = ?, genre = ?, category_id = ? " +
+             "where id = ?";
+
+// ..... \\
+
+if(stmt.executeUpdate() == 1) {
+    System.out.println("Updated book " + book.getId());
+} else {
+    System.out.println("Failed to update book " + book.getId());
+}
+```
+
+commit or rollback a transaciton when it's done
+
+```java
+try(...){
+    
+    connection.commit();
+} catch(SQLException ex) {
+    connection.rollback();
+}
+```
