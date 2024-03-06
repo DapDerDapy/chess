@@ -1041,3 +1041,28 @@ for (var pw : passwords) {
     System.out.printf("%s %s %s%n", pw, match, secret);
 }
 ```
+
+# 3/6/24
+
+### Logging
+- prints information about different processes of a program while it's executing
+- Also has **Stack Traces**
+  - seeing what king of stuff gets added to a stack
+  - useful stuff
+
+### Defensive Programming
+- **Assertions**
+  - Different from JUnit tests
+  - As we program we make many assumptions about the state of the program at each point in the code
+  - So Assertions are little tests cases sprinkled throughout the ode that alert you when an assumption is wrong
+- **Parameter Checking**
+  - check input parameters for functions to see if they work and such
+
+### Debugging
+- Consider assertions and parameter checking as an early way to detect bugs
+- Make reproducible test cases
+- Have smaller input files!
+  - If it takes 30 minutes to find the bug, big rip...
+- Consider the scientific method hehateha 
+
+

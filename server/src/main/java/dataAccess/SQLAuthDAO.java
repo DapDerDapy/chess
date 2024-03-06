@@ -21,62 +21,86 @@ public class SQLAuthDAO implements AuthDAO {
             stmt.setString(2, username);
             stmt.executeUpdate();
 
-            return authToken;
-        } catch (SQLException | DataAccessException) {
-            throw new DataAccessException("Failed to create auth token: " + e.getMessage());
+        } catch (SQLException | DataAccessException e) {
+            // Handle the SQL exception
+            // For example, log the error or convert it to a runtime exception
+            throw new RuntimeException("Failed to create auth token: " + e.getMessage());
         }
+
+        return authToken;
     }
+
 
     @Override
     public String getAuth(String authToken) {
-        String sql = "SELECT username FROM auth_tokens WHERE token = ?";
+        // Assuming the table is called auth_tokens and the columns are auth_token for the token
+        // and username for the username
+        String sql = "SELECT username FROM auth_tokens WHERE auth_token = ?;";
+
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, authToken);
-            try (ResultSet rs = pstmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, authToken);
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
+                    // Retrieve and return the username associated with the authToken
                     return rs.getString("username");
                 }
             }
+
         } catch (SQLException | DataAccessException e) {
-            System.err.println("Failed to retrieve auth token: " + e.getMessage());
-            // Handle exception or rethrow as appropriate
+            // Handle the exception appropriately
+            throw new RuntimeException("Failed to retrieve auth token: " + e.getMessage());
         }
+
+        // Return null if no matching auth token is found
         return null;
     }
 
+
     @Override
     public boolean deleteAuth(String authToken) {
-        String sql = "DELETE FROM auth_tokens WHERE token = ?";
+        String sql = "DELETE FROM auth_tokens WHERE auth_token = ?;";
+
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, authToken);
-            int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, authToken);
+            int affectedRows = stmt.executeUpdate();
+
+            // If affectedRows is 1, then the deletion was successful
+            return affectedRows == 1;
+
         } catch (SQLException | DataAccessException e) {
-            System.err.println("Failed to delete auth token: " + e.getMessage());
-            // Handle exception or rethrow as appropriate
+            // Handle the exception appropriately
+            throw new RuntimeException("Failed to delete auth token: " + e.getMessage());
         }
-        return false;
     }
+
 
     @Override
     public boolean isValidToken(String authToken) {
-        String sql = "SELECT COUNT(*) FROM auth_tokens WHERE token = ?";
+        String sql = "SELECT COUNT(*) AS count FROM auth_tokens WHERE auth_token = ?;";
+
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, authToken);
-            try (ResultSet rs = pstmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, authToken);
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0;
+                    // Check if count is greater than 0, indicating the token exists
+                    return rs.getInt("count") > 0;
                 }
             }
+
         } catch (SQLException | DataAccessException e) {
-            System.err.println("Failed to validate auth token: " + e.getMessage());
-            // Handle exception or rethrow as appropriate
+            // Handle the exception appropriately
+            throw new RuntimeException("Failed to validate auth token: " + e.getMessage());
         }
+
         return false;
     }
+
 
     @Override
     public String getUsernameFromToken(String authToken) {
