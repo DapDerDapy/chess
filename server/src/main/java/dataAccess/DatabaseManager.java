@@ -105,6 +105,18 @@ public class DatabaseManager {
                         "email VARCHAR(255) NOT NULL" +
                         ")";
                 stmt.executeUpdate(sqlCreateUsersTable);
+            } try (Statement stmt = conn.createStatement()){
+                String sqlCreateAuthTable =
+                        """
+                        CREATE TABLE IF NOT EXISTS `auth_tokens` (
+                        `token_id` INT AUTO_INCREMENT PRIMARY KEY,
+                        `auth_token` VARCHAR(255) NOT NULL,
+                        `username` VARCHAR(255) NOT NULL,
+                        `creation_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+                        """;
+                stmt.executeUpdate(sqlCreateAuthTable);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to setup database tables: " + e.getMessage());

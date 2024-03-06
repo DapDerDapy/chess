@@ -5,8 +5,6 @@ import java.sql.*;
 
 public class SQLUserDAO implements UserDAO {
 
-
-
     @Override
     public void clear() {
         String sql = "DELETE FROM users";
