@@ -5,16 +5,12 @@ import java.sql.*;
 
 public class SQLUserDAO implements UserDAO {
 
-    private final DatabaseManager dbManager; // Assume this is your class to manage database connections
 
-    public SQLUserDAO(DatabaseManager dbManager) {
-        this.dbManager = dbManager;
-    }
 
     @Override
     public void clear() {
         String sql = "DELETE FROM users";
-        try (Connection conn = dbManager.getConnection();
+        try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (SQLException | DataAccessException e) {
@@ -55,7 +51,7 @@ public class SQLUserDAO implements UserDAO {
     public UserData getUser(String username) {
         String sql = "SELECT * FROM users WHERE username = ?";
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {

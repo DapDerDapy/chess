@@ -34,7 +34,7 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    public static void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
             var conn = DriverManager.getConnection(connectionUrl, user, password);
@@ -67,5 +67,47 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
     }
+    public static void clear() throws DataAccessException {
+        String[] tablesToDrop = {"YourTable1", "YourTable2", "YourTableN"}; // List your tables here
 
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false);
+            try (Statement stmt = conn.createStatement()) {
+                for (String table : tablesToDrop) {
+                    try {
+                        stmt.executeUpdate("DROP TABLE IF EXISTS " + table);
+                    } catch (SQLException e) {
+                        conn.rollback(); // Rollback transaction if dropping any table fails
+                        throw e; // Rethrow the exception to be handled outside
+                    }
+                }
+                conn.commit(); // Commit transaction if all drops are successful
+            } catch (SQLException e) {
+                throw new DataAccessException("Failed to clear database: " + e.getMessage());
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Database connection problem: " + e.getMessage());
+        }
+    }
+
+
+    /**
+     * Sets up the required database tables if they do not already exist.
+     */
+    public static void setupDatabaseTables() throws DataAccessException {
+        try (Connection conn = getConnection()) {
+            try (Statement stmt = conn.createStatement()) {
+                String sqlCreateUsersTable =
+                        "CREATE TABLE IF NOT EXISTS users (" +
+                        "id INT AUTO_INCREMENT PRIMARY KEY," +
+                        "username VARCHAR(255) NOT NULL," +
+                        "password VARCHAR(255) NOT NULL," +
+                        "email VARCHAR(255) NOT NULL" +
+                        ")";
+                stmt.executeUpdate(sqlCreateUsersTable);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to setup database tables: " + e.getMessage());
+        }
+    }
 }
