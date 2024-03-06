@@ -998,3 +998,46 @@ try(...){
     connection.rollback();
 }
 ```
+
+# 3/4/24
+
+### Database Transactions
+
+run the statements inside of a transaction, that way it can help if things go wrong!
+- COMMIT TRANSACTION; or ROLLBACK TRANSACTION
+
+```java
+//start a transaction
+connection.setAutoCommit(false);
+
+// a lot of code
+
+//commit transaction
+connection.commit();
+```
+```java
+//configure database
+priavte void configureDatabase() throws ResponseExcetption{
+    DatabaseManager.createDatabase();
+    try(...)
+      
+      // there's the rest of the code in petshop, consider using it and putting it in!
+}
+```
+
+### Storing Passwords
+
+- Use BCrypt to store a hashed version of the password
+- this hash cannot be reverse engineered
+```java
+BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+String secret = "asdfj;lk";
+String has = encoder.encode(secret);
+
+String[] passwords = {"cow", "asdfj;lk", "password"};
+for (var pw : passwords) {
+    var match = encoder.matches(pw, hash) ? "==" : "!=";
+    
+    System.out.printf("%s %s %s%n", pw, match, secret);
+}
+```
