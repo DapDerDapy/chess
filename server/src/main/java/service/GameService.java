@@ -58,25 +58,27 @@ public class GameService {
         return gameDAO.listGames();
     }
 
-    public JoinGameResult joinGame(String authToken, JoinGameRequest request) throws AuthenticationException, AlreadyTakenException {
-        // Validate the authToken
+    public JoinGameResult joinGame(String authToken, JoinGameRequest request) throws AuthenticationException, AlreadyTakenException, InvalidGameIdException {
         if (!authDAO.isValidToken(authToken)) {
             throw new AuthenticationException("Invalid or expired authToken.");
         }
 
-        // Check if the color is already taken
+        // Add a check for the validity of the game ID
+        if (gameDAO.getGame(request.gameID()) == null) {
+            throw new InvalidGameIdException("error: Invalid game ID: " + request.gameID());
+        }
+
         boolean colorTaken = gameDAO.isColorTaken(request.gameID(), request.playerColor());
         if (colorTaken) {
             throw new AlreadyTakenException("error: Color already taken.");
         }
 
-        // Proceed to attempt to join the game
         boolean joined = gameDAO.joinGame(request.gameID(), request.playerColor(), authToken, authDAO.getUsernameFromToken(authToken));
         if (joined) {
             return new JoinGameResult(true, "Successfully joined the game.");
         } else {
-            // Handle other failure reasons
             return new JoinGameResult(false, "Failed to join the game. It may be full, or the game ID may be incorrect.");
         }
     }
+
 }

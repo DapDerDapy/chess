@@ -511,10 +511,6 @@ public class StandardAPITests {
                 "Result returned an error message");
 
         TestModels.TestListResult listResult = serverFacade.listGames(existingAuth);
-
-        System.out.println(listResult.games);
-
-        System.out.println("hello?");
         Assertions.assertEquals(1, listResult.games.length);
         Assertions.assertEquals(existingUser.username, listResult.games[0].whiteUsername);
         Assertions.assertNull(listResult.games[0].blackUsername);

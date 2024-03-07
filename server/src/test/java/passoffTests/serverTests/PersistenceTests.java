@@ -74,13 +74,9 @@ public class PersistenceTests {
         Assertions.assertEquals(200, serverFacade.getStatusCode(), "Server response code was not 200 OK");
         Assertions.assertEquals(1, listResult.games.length, "Missing game(s) in database after restart");
 
-        System.out.println(listResult.games[0]);
-
         TestModels.TestListResult.TestListEntry game1 = listResult.games[0];
         Assertions.assertEquals(game1.gameID, createResult.gameID);
         Assertions.assertEquals(createRequest.gameName, game1.gameName, "Game name changed after restart");
-
-        System.out.println(game1);
         Assertions.assertEquals(registerRequest.username, game1.whiteUsername,
                 "White player username changed after restart");
 

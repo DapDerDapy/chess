@@ -101,7 +101,7 @@ public class GameHandler {
     }
 
 
-    public Object joinGameHandler(Request req, Response res) throws AuthenticationException, AlreadyTakenException{
+    public Object joinGameHandler(Request req, Response res) {
         try {
             String authToken = req.headers("Authorization");
             if (authToken == null || authToken.isEmpty()) {
@@ -114,23 +114,24 @@ public class GameHandler {
 
             if (joinResult.success()) {
                 res.status(200); // Success
-                return gson.toJson(joinResult); // Assuming joinResult includes the necessary success message
-            } else if (joinResult.message().equals("error: Color already taken.")){
-                res.status(403); // Forbidden
-                return gson.toJson(new SimpleResponse(false, "Error: already taken"));
+                return gson.toJson(joinResult);
             } else {
                 res.status(400); // Bad Request
-                return gson.toJson(new SimpleResponse(false, "Error: bad request"));
+                return gson.toJson(new SimpleResponse(false, joinResult.message()));
             }
+        } catch (InvalidGameIdException e) {
+            res.status(400); // Bad Request
+            return gson.toJson(new SimpleResponse(false, e.getMessage()));
         } catch (AuthenticationException e) {
             res.status(401); // Unauthorized
             return gson.toJson(new SimpleResponse(false, "Error: unauthorized"));
         } catch (AlreadyTakenException e) {
             res.status(403); // Forbidden
-            return gson.toJson(new SimpleResponse(false, e.getMessage())); // Use the exception's message
+            return gson.toJson(new SimpleResponse(false, e.getMessage()));
         } catch (Exception e) {
             res.status(500); // Internal Server Error
             return gson.toJson(new SimpleResponse(false, "Error: " + e.getMessage()));
         }
     }
+
 }

@@ -25,6 +25,11 @@ public class UserService {
         if (userDAO.getUser(request.username()) != null) {
             return new RegisterResult(false, "error: Username already exists.", null, null);
         }
+        if (userDAO.getUser(request.username()) != null) {
+            return new RegisterResult(false, "error: Username already exists.", null, null);
+        } else if (request.password() == null || request.password().isEmpty()) {
+            return new RegisterResult(false, "error: Password cannot be empty.", null, null);
+        }
 
         // Hash the password before storing it
         String hashedPassword = encoder.encode(request.password());

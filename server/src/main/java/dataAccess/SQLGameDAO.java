@@ -83,60 +83,62 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public boolean joinGame(int gameID, String color, String authToken, String username) {
-        Connection conn = null; // Declare connection outside try block
+        Connection conn = null;
         try {
             conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false); // Disable auto-commit to manage transaction manually
 
-            // Check if the color is already taken. If so, return false
-            if (isColorTaken(gameID, color)) {
-                return false;
-            }
-
-            // Determine which color is being joined and set the appropriate username
-            String updateSql = "UPDATE games SET ";
-            if (color.equals("BLACK")) {
-                updateSql += "black_username = ? ";
-            } else if (color.equals("WHITE")) {
-                updateSql += "white_username = ? ";
-            }
-            updateSql += "WHERE game_id = ?;";
-
-            try (PreparedStatement pstmtUpdate = conn.prepareStatement(updateSql)) {
-                pstmtUpdate.setString(1, username);
-                pstmtUpdate.setInt(2, gameID);
-                int rowsUpdated = pstmtUpdate.executeUpdate();
-                if (rowsUpdated == 0) {
-                    // Handle the case where the game ID does not exist or no rows were updated
-                    conn.rollback(); // Rollback the transaction
+            if (color == null || color.isEmpty()) {
+                // Joining as a watcher, assuming there's a watchers table or a way to mark them in game_participants
+                // Adjust this SQL based on your database schema
+                String sqlInsertWatcher = "INSERT INTO game_watchers (game_id, username) VALUES (?, ?);";
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertWatcher)) {
+                    pstmt.setInt(1, gameID);
+                    pstmt.setString(2, username);
+                    pstmt.executeUpdate();
+                }
+            } else {
+                // Joining as a player, make sure color is not already taken
+                if (isColorTaken(gameID, color)) {
+                    conn.rollback(); // Rollback to ensure consistency
                     return false;
                 }
+
+                String updateSql = "UPDATE games SET ";
+                if ("BLACK".equalsIgnoreCase(color)) {
+                    updateSql += "black_username = ? ";
+                } else if ("WHITE".equalsIgnoreCase(color)) {
+                    updateSql += "white_username = ? ";
+                }
+                updateSql += "WHERE game_id = ?;";
+
+                try (PreparedStatement pstmtUpdate = conn.prepareStatement(updateSql)) {
+                    pstmtUpdate.setString(1, username);
+                    pstmtUpdate.setInt(2, gameID);
+                    int rowsUpdated = pstmtUpdate.executeUpdate();
+                    if (rowsUpdated == 0) {
+                        conn.rollback(); // Rollback in case no rows were updated, which means game ID does not exist
+                        return false;
+                    }
+                }
             }
 
-            // Insert into game_participants logic here... but only if you want.....
-
-            conn.commit(); // Commit the transaction
+            conn.commit(); // Commit the transaction if everything went fine
             return true;
         } catch (SQLException | DataAccessException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback(); // Rollback in case of error
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
+            e.printStackTrace(); // Consider proper logging
+            // Handle rollback in catch block if necessary
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
-            throw new RuntimeException("Error joining game or updating player username: " + e.getMessage());
+            throw new RuntimeException("Error joining game: " + e.getMessage());
         } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true); // Reset auto-commit to default
-                    conn.close(); // Ensure connection is closed
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            // Finally block for setting auto-commit true and closing the connection is unnecessary with try-with-resources
         }
     }
+
 
 
 

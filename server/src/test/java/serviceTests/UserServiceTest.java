@@ -12,6 +12,7 @@ import result.RegisterResult;
 import request.LoginRequest;
 import result.LoginResult;
 import service.UserService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,21 +69,25 @@ public class UserServiceTest {
 
     @Test
     void testLoginSuccess() throws AuthenticationException {
-        // Arrange
+// Arrange
         String expectedUsername = "testUser";
         String expectedPassword = "testPassword";
         String expectedAuthToken = "authToken123";
-        UserData mockUser = new UserData(expectedUsername, expectedPassword, "testEmail");
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(expectedPassword);
+        UserData mockUser = new UserData(expectedUsername, hashedPassword, "testEmail");
 
         when(userDAO.getUser(expectedUsername)).thenReturn(mockUser);
         when(authDAO.createAuth(expectedUsername)).thenReturn(expectedAuthToken);
 
-        // Act
-        LoginResult result = userService.login(new LoginRequest(expectedUsername, expectedPassword, expectedAuthToken));
+// Act
+        LoginRequest loginRequest = new LoginRequest(expectedUsername, expectedPassword, expectedAuthToken);
+        LoginResult result = userService.login(loginRequest);
 
-        // Assert
+// Assert
         assertEquals(expectedUsername, result.username());
         assertEquals(expectedAuthToken, result.authToken());
+
     }
 
     @Test
