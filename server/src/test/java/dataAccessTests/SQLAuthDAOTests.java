@@ -14,13 +14,13 @@ public class SQLAuthDAOTests {
     void setUp() throws Exception {
         // Ensure the database is clean before each test
         DatabaseManager.clear();
+        DatabaseManager.setupDatabaseTables();
         sqlAuthDAO = new SQLAuthDAO();
     }
 
     @AfterEach
     void tearDown() throws Exception {
         // Clean up the database after tests
-        DatabaseManager.setupDatabaseTables();
         DatabaseManager.clear();
     }
 
@@ -67,7 +67,6 @@ public class SQLAuthDAOTests {
         String authToken = sqlAuthDAO.createAuth(username);
 
         // When & Then: Check if the token is valid
-        System.out.println(authToken);
         assertTrue(sqlAuthDAO.isValidToken(authToken), "The authToken should be valid");
 
         // And: Check if a non-existent token is not valid

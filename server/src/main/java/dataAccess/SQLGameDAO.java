@@ -83,19 +83,28 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public boolean joinGame(int gameID, String color, String authToken, String username) {
-        // First, check if the color is already taken for this game
-        if (isColorTaken(gameID, color)) {
-            return false;
+        // First, verify if the game exists and if the color is already taken
+         if (getGame(gameID) == null || isColorTaken(gameID, color)) {
+            return false; // Game not found or color already taken
         }
 
-        String sqlInsert = "INSERT INTO game_participants (game_id, username, role, auth_token) VALUES (?, ?, ?, ?);";
+        // Since the color is not taken, proceed to join the game as a player or observer
+        String sqlInsert;
+        if (!color.isEmpty()) {
+            // Joining as a player
+            sqlInsert = "INSERT INTO game_participants (game_id, username, color) VALUES (?, ?, ?);";
+        } else {
+            // Joining as an observer without specifying a color
+            sqlInsert = "INSERT INTO game_participants (game_id, username) VALUES (?, ?);";
+        }
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sqlInsert)) {
             pstmt.setInt(1, gameID);
             pstmt.setString(2, username);
-            pstmt.setString(3, color);
-            pstmt.setString(4, authToken);
+            if (!color.isEmpty()) {
+                pstmt.setString(3, color);
+            }
 
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -104,18 +113,28 @@ public class SQLGameDAO implements GameDAO {
         }
     }
 
+
+
     @Override
     public boolean isColorTaken(int gameID, String color) {
-        String sqlCheck = "SELECT count(*) FROM game_participants WHERE game_id = ? AND role = ?;";
+        String sqlCheck;
+        if ("BLACK".equalsIgnoreCase(color)) {
+            sqlCheck = "SELECT count(*) FROM games WHERE game_id = ? AND black_username IS NOT NULL;";
+        } else if ("WHITE".equalsIgnoreCase(color)) {
+            sqlCheck = "SELECT count(*) FROM games WHERE game_id = ? AND white_username IS NOT NULL;";
+        } else {
+            // If color is neither BLACK nor WHITE, assume it's not taken
+            return false;
+        }
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sqlCheck)) {
             pstmt.setInt(1, gameID);
-            pstmt.setString(2, color);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt(1) > 0; // If count > 0, then the color is already taken
+                    int count = rs.getInt(1);
+                    return count > 0; // If count > 0, then the specified color is already taken
                 }
             }
         } catch (SQLException | DataAccessException e) {
@@ -123,6 +142,9 @@ public class SQLGameDAO implements GameDAO {
         }
         return false; // Default to false if not found
     }
+
+
+
 
     @Override
     public void clearAll() {
