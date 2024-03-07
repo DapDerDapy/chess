@@ -5,20 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Collection;
-import wrappers.*;
 
 public class MemoryGameDAO implements GameDAO {
     private final List<GameData> gameInfo = new ArrayList<>();
     private final AtomicInteger gameIdCounter = new AtomicInteger();
-
-    private String blackUsername;
-    private String whiteUsername;
-
     public int createGame(String gameName, String blackUsername, String whiteUsername, ChessGame chessGame){
-
-        this.blackUsername = blackUsername;
-        this.whiteUsername = whiteUsername;
 
         int gameId = gameIdCounter.incrementAndGet();
         GameData newGame = new GameData(gameId, blackUsername, whiteUsername, gameName, chessGame);
@@ -28,14 +19,13 @@ public class MemoryGameDAO implements GameDAO {
 
     public boolean isColorTaken(int gameID, String color) {
         for (GameData game : gameInfo) {
-            if (game.getGameID() == gameID) { // Assuming GameData has a getter for gameId
+            if (game.getGameID() == gameID) {
                 if ("BLACK".equals(color)) {
                     if (game.getBlackUsername() != null)
                         return true;
                 } else if ("WHITE".equals(color)) {
                     if (game.getWhiteUsername() != null)
                         return true;
-                    //return game.whiteUsername() != null;
                 }
                 break; // Exit the loop once the game is found
             }
@@ -53,7 +43,6 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public boolean joinGame(int gameID, String color, String authToken, String username) {
-        // Example implementation - adjust according to your actual data structure
         GameData game = getGame(gameID); // Implement this method to find a game by ID
         if (game == null) {
             return false; // Game not found
@@ -73,8 +62,6 @@ public class MemoryGameDAO implements GameDAO {
             } else if (isColorTaken(gameID, color)) {
                 return false;
             } else {
-                // Joining as an observer
-                //game.addObserver(authToken); // Implement this method
                 return true;
             }
         }

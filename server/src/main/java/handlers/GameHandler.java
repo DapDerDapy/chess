@@ -86,10 +86,6 @@ public class GameHandler {
             }
 
             Collection<GameData> games = gameService.listGames(authToken);
-            //if (games.isEmpty()) {
-            //    res.status(200); // OK, but no games available
-            //    return gson.toJson(new SimpleResponse(true, "No games available."));
-            //}
 
             // Wrap the games list into the GamesWrapper, something is wrong with Gson conversion things?
             GamesWrapper wrapper = new GamesWrapper(games);
