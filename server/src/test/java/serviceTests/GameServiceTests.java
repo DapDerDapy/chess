@@ -108,8 +108,6 @@ public class GameServiceTests {
         Collection<GameData> actualGames = gameService.listGames(validToken);
 
         // Verify
-        System.out.println(expectedGames);
-        System.out.println(actualGames);
         assertNotNull(actualGames, "The actual games collection should not be null.");
         assertEquals(expectedGames.size(), actualGames.size(), "The number of games should match the expected size.");
 
@@ -148,8 +146,7 @@ public class GameServiceTests {
         // Optional: More detailed assertions to check if all expected games are present in the actual list
         assertTrue(actualGames.containsAll(expectedGames), "The actual games list should contain all the expected games.");
 
-        System.out.println(expectedGames);
-        System.out.println(actualGames);
+
         // Verify interactions
         verify(authDAO, times(1)).isValidToken(validToken);
         verify(gameDAO, times(1)).listGames();
