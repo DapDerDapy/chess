@@ -70,8 +70,8 @@ public class SQLGameDAO implements GameDAO {
             while (rs.next()) {
                 gamesList.add(new GameData(
                         rs.getInt("game_id"),
-                        rs.getString("black_username"),
                         rs.getString("white_username"),
+                        rs.getString("black_username"),
                         rs.getString("game_name"),
                         gson.fromJson(rs.getString("game_state"), ChessGame.class))); // Deserialize game state from JSON
             }
@@ -83,35 +83,62 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public boolean joinGame(int gameID, String color, String authToken, String username) {
-        // First, verify if the game exists and if the color is already taken
-         if (getGame(gameID) == null || isColorTaken(gameID, color)) {
-            return false; // Game not found or color already taken
-        }
+        Connection conn = null; // Declare connection outside try block
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false); // Start transaction
 
-        // Since the color is not taken, proceed to join the game as a player or observer
-        String sqlInsert;
-        if (!color.isEmpty()) {
-            // Joining as a player
-            sqlInsert = "INSERT INTO game_participants (game_id, username, color) VALUES (?, ?, ?);";
-        } else {
-            // Joining as an observer without specifying a color
-            sqlInsert = "INSERT INTO game_participants (game_id, username) VALUES (?, ?);";
-        }
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sqlInsert)) {
-            pstmt.setInt(1, gameID);
-            pstmt.setString(2, username);
-            if (!color.isEmpty()) {
-                pstmt.setString(3, color);
+            // Check if the color is already taken. If so, return false
+            if (isColorTaken(gameID, color)) {
+                return false;
             }
 
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
+            // Determine which color is being joined and set the appropriate username
+            String updateSql = "UPDATE games SET ";
+            if (color.equals("BLACK")) {
+                updateSql += "black_username = ? ";
+            } else if (color.equals("WHITE")) {
+                updateSql += "white_username = ? ";
+            }
+            updateSql += "WHERE game_id = ?;";
+
+            try (PreparedStatement pstmtUpdate = conn.prepareStatement(updateSql)) {
+                pstmtUpdate.setString(1, username);
+                pstmtUpdate.setInt(2, gameID);
+                int rowsUpdated = pstmtUpdate.executeUpdate();
+                if (rowsUpdated == 0) {
+                    // Handle the case where the game ID does not exist or no rows were updated
+                    conn.rollback(); // Rollback the transaction
+                    return false;
+                }
+            }
+
+            // Insert into game_participants logic here... but only if you want.....
+
+            conn.commit(); // Commit the transaction
+            return true;
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException("Error joining game: " + e.getMessage());
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback in case of error
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Error joining game or updating player username: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Reset auto-commit to default
+                    conn.close(); // Ensure connection is closed
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
+
+
 
 
 
