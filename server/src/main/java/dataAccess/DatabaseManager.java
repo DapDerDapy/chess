@@ -24,7 +24,8 @@ public class DatabaseManager {
 
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
-                connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+                connectionUrl = "jdbc:mysql://localhost:3306/chess";
+                //connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
             }
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
