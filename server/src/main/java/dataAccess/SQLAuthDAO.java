@@ -8,6 +8,9 @@ import java.util.UUID;
 
 public class SQLAuthDAO implements AuthDAO {
 
+    public SQLAuthDAO() throws DataAccessException {
+        DatabaseManager.setupDatabaseTables();
+    }
 
     @Override
     public String createAuth(String username) {

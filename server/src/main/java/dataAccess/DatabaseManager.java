@@ -96,6 +96,9 @@ public class DatabaseManager {
      * Sets up the required database tables if they do not already exist.
      */
     public static void setupDatabaseTables() throws DataAccessException {
+
+        DatabaseManager.createDatabase();
+
         try (Connection conn = getConnection()) {
             try (Statement stmt = conn.createStatement()) {
                 String sqlCreateUsersTable =

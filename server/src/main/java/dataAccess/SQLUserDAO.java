@@ -5,6 +5,10 @@ import java.sql.*;
 
 public class SQLUserDAO implements UserDAO {
 
+    public SQLUserDAO() throws DataAccessException {
+        DatabaseManager.setupDatabaseTables();
+    }
+
     @Override
     public void clear() {
         String sql = "DELETE FROM users";

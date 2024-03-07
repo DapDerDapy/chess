@@ -11,6 +11,10 @@ import com.google.gson.Gson;
 public class SQLGameDAO implements GameDAO {
     private final Gson gson = new Gson();
 
+    public SQLGameDAO() throws DataAccessException {
+        DatabaseManager.setupDatabaseTables();
+    }
+
     @Override
     public int createGame(String gameName, String blackUsername, String whiteUsername, ChessGame gameState) {
         String sql = "INSERT INTO games (game_name, black_username, white_username, game_state) VALUES (?, ?, ?, ?);";
