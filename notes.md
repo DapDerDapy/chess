@@ -1065,4 +1065,42 @@ for (var pw : passwords) {
   - If it takes 30 minutes to find the bug, big rip...
 - Consider the scientific method hehateha 
 
+# 3/11/24
 
+## Client Web API
+
+**HttpURLConnection** is the same as a JS "fetch"
+
+```java
+class ServerFacade {
+    RegisterResult register(RegisterRequest req);
+    LoginResult login(LoginRequest req);
+}
+```
+Java has a class named **URL**, put a string in it to build the URL object
+```java
+URL url = new URL(urlString);
+```
+
+Then get the connection!
+```java
+HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+```
+**GET** vs **POST**
+- Post has a body!
+```java
+connection.setRequestMethod("POST");
+connection.setDoOutput(true);
+```
+
+That setDoOutput thing is for the body, also make sure to close the stream!
+
+- use the petshop code to help with all the requests and such
+- Start by writing the serverfacade, then the tests
+
+*MORE!* - Here's how to initialize every unicode thing in java.
+```java
+public static final String UNICODE_ESCAPE = "\u001b";
+```
+
+USe the unicode characters for the chess pieces :) 
