@@ -1,8 +1,9 @@
-
+import dataAccess.AuthDAO;
 
 public class UI {
     private boolean isLoggedIn = false;
     private String authToken = null;
+
 
     public void runUI() {
         while (true) {

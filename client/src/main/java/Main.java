@@ -4,6 +4,7 @@ import service.UserService;
 import dataAccess.*;
 
 public class Main {
+
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
 
@@ -12,7 +13,6 @@ public class Main {
         // Start the server on port 8080
         int port = server.run(8080);
         System.out.println("Server running on port " + port);
-
         UI ui = new UI();
         ui.runUI();
 

@@ -21,12 +21,12 @@ public class PostLoginUI {
 
     public void displayMenu() {
         System.out.println(ANSI_YELLOW + "Welcome back to 240 Chess! You are logged in." + ANSI_RESET);
-        System.out.println("1. Help");
-        System.out.println("2. Logout");
-        System.out.println("3. Create Game");
-        System.out.println("4. List Games");
-        System.out.println("5. Join Game");
-        System.out.println("6. Join as Observer");
+        System.out.println( "1. " + ANSI_CYAN + "Help" + ANSI_RESET);
+        System.out.println("2. " + ANSI_RED + "Logout" + ANSI_RESET);
+        System.out.println("3. " + ANSI_YELLOW + "Create Game" + ANSI_RESET);
+        System.out.println("4. " + ANSI_BLUE + "List Games" + ANSI_RESET);
+        System.out.println("5. " + ANSI_PURPLE +  "Join Game" + ANSI_RESET);
+        System.out.println("6. " + ANSI_GREEN + "Join as Observer" + ANSI_RESET);
         System.out.print("Please enter your choice: ");
     }
 
@@ -65,7 +65,13 @@ public class PostLoginUI {
     }
 
     private void displayHelp() {
-        // Implementation of Help
+        System.out.println(ANSI_CYAN + "Help:" + ANSI_RESET);
+        System.out.println("- Type '1' to see this help message.");
+        System.out.println("- Type '2' to logout and return to the PreLoginUI.");
+        System.out.println("- Type '3' to create a new chess game.");
+        System.out.println("- Type '4' to list all current games.");
+        System.out.println("- Type '5' to join a game.");
+        System.out.println("- Type '6' to join a game as an observer.");
     }
 
     private void logout() {

@@ -7,16 +7,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
+import dataAccess.AuthDAO;
 
 public class PreloginUI {
 
     private Scanner scanner;
-
-    private UserService userService;
-
     private boolean moveToPost = false;
-    private String authToken = null;
-
 
     // ANSI escape code colors
     private final String ANSI_RESET = "\u001B[0m";
@@ -34,8 +33,11 @@ public class PreloginUI {
         return moveToPost;
     }
 
-    public String getAuthToken() {
-        return authToken;
+    public String createAuth(HttpResponse<String> response){
+        String responseBody = response.body();
+        Gson gson = new Gson();
+        JsonObject jsonResponse = gson.fromJson(responseBody, JsonObject.class);
+        return jsonResponse.get("authToken").getAsString();
     }
 
 
@@ -114,7 +116,8 @@ public class PreloginUI {
                 System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
                 // Here you would transition to Postlogin UI and pass along any needed information such as authToken
 
-                PostLoginUI postLoginUI = new PostLoginUI(null);
+                String authToken = createAuth(response);
+                PostLoginUI postLoginUI = new PostLoginUI(authToken);
                 postLoginUI.processUserInput();
 
             } else {
@@ -154,7 +157,8 @@ public class PreloginUI {
             if (response.statusCode() == 200) {
                 System.out.println("Registration successful. Transitioning to Postlogin UI...");
                 // Transition to Postlogin UI here
-                PostLoginUI postLoginUI = new PostLoginUI(null);
+                String authToken = createAuth(response);
+                PostLoginUI postLoginUI = new PostLoginUI(authToken);
                 postLoginUI.processUserInput();
             } else {
                 System.out.println("Registration failed: " + response.body());
