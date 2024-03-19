@@ -14,6 +14,9 @@ public class PreloginUI {
 
     private UserService userService;
 
+    private boolean moveToPost = false;
+    private String authToken = null;
+
 
     // ANSI escape code colors
     private final String ANSI_RESET = "\u001B[0m";
@@ -26,6 +29,15 @@ public class PreloginUI {
     public PreloginUI() {
         this.scanner = new Scanner(System.in);
     }
+
+    public boolean moveToPost() {
+        return moveToPost;
+    }
+
+    public String getAuthToken() {
+        return authToken;
+    }
+
 
     public void displayMenu() {
         System.out.println(ANSI_YELLOW + "Welcome to 240 Chess!" + ANSI_RESET);
@@ -101,6 +113,10 @@ public class PreloginUI {
                 // Extract authToken and other necessary details here if needed
                 System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
                 // Here you would transition to Postlogin UI and pass along any needed information such as authToken
+
+                PostLoginUI postLoginUI = new PostLoginUI(null);
+                postLoginUI.processUserInput();
+
             } else {
                 // If login failed, the server response might include the reason which you can display to the user
                 System.out.println(ANSI_RED + "Login failed: " + response.body() + ANSI_RESET);
@@ -138,6 +154,8 @@ public class PreloginUI {
             if (response.statusCode() == 200) {
                 System.out.println("Registration successful. Transitioning to Postlogin UI...");
                 // Transition to Postlogin UI here
+                PostLoginUI postLoginUI = new PostLoginUI(null);
+                postLoginUI.processUserInput();
             } else {
                 System.out.println("Registration failed: " + response.body());
             }
