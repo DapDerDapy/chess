@@ -1,8 +1,19 @@
 import java.util.Scanner;
+import service.UserService;
+import request.*;
+import result.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 
 public class PreloginUI {
 
     private Scanner scanner;
+
+    private UserService userService;
+
 
     // ANSI escape code colors
     private final String ANSI_RESET = "\u001B[0m";
@@ -61,12 +72,78 @@ public class PreloginUI {
     }
 
     private void login() {
-        System.out.println(ANSI_GREEN + "Login (this functionality is not implemented yet)" + ANSI_RESET);
-        // Implementation for login goes here
+        System.out.println(ANSI_GREEN + "Please log in:" + ANSI_RESET);
+
+        // Prompt for username
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+
+        // Prompt for password
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            // Create the JSON body for the login request
+            String requestBody = String.format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/session")) // Adjust the URI to your login endpoint
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // If the login was successful, server should respond with the authToken
+                // Extract authToken and other necessary details here if needed
+                System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
+                // Here you would transition to Postlogin UI and pass along any needed information such as authToken
+            } else {
+                // If login failed, the server response might include the reason which you can display to the user
+                System.out.println(ANSI_RED + "Login failed: " + response.body() + ANSI_RESET);
+            }
+        } catch (Exception e) {
+            System.out.println(ANSI_RED + "Error during login: " + e.getMessage() + ANSI_RESET);
+        }
     }
 
+
+
+
     private void register() {
-        System.out.println(ANSI_GREEN + "Register (this functionality is not implemented yet)" + ANSI_RESET);
-        // Implementation for register goes here
+        try {
+            System.out.print(ANSI_MAGENTA + "Enter username: " + ANSI_RESET);
+            String username = scanner.nextLine();
+            System.out.print(ANSI_MAGENTA + "Enter email: " + ANSI_RESET);
+            String email = scanner.nextLine();
+            System.out.print(ANSI_MAGENTA + "Enter password: " + ANSI_RESET);
+            String password = scanner.nextLine();
+
+            String requestBody = String.format("{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}",
+                    username, password, email);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/user")) // Adjust the port number accordingly
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Registration successful. Transitioning to Postlogin UI...");
+                // Transition to Postlogin UI here
+            } else {
+                System.out.println("Registration failed: " + response.body());
+            }
+        } catch (Exception e) {
+            System.out.println("Error during registration: " + e.getMessage());
+        }
     }
+
 }

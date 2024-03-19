@@ -1104,3 +1104,33 @@ public static final String UNICODE_ESCAPE = "\u001b";
 ```
 
 USe the unicode characters for the chess pieces :) 
+
+# 3/18/24
+
+## WebSocket
+
+- start off using HTTP to establish something, and websocket keeps it open
+
+```java
+
+import WebSocket; //not sure if this is actually how to bring it in haha
+
+@WebSocket
+public class WSServer {
+    public static void main (String[] args) {
+        Spark.port(8080);
+        Spark.webSocket("/connect", WSServer.class);
+        Spark.get("/echo/:msg", (req, res) -> "HTTP Response: " + req.params(":msg"));
+    }
+    
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws Exception {
+        session.getRemote().sendString("WebSocket response: " + message);
+    }
+}
+```
+
+- Use a concurrent hashmap to take care of the Connections
+- go to the Connection Manager in PetShop and use similar stuff to make it work
+- WebSocket will pretty much just be used for handling the game itself
+  - So nothing to do with pre/post login UI
