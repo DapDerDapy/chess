@@ -3,6 +3,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import chess.ChessGame;
 import java.net.http.HttpResponse.BodyHandlers;
 
 public class PostLoginUI {
@@ -110,6 +111,10 @@ public class PostLoginUI {
 
     private void createGame() {
         // Implementation of Create Game
+        // Example of creating a new game - adjust according to your application's logic
+        ChessGame game = new ChessGame(); // Assuming you have a ChessGame class
+        GameUI gameUI = new GameUI(game);
+        gameUI.displayBoards(); // Or any initial method to start the game interaction
     }
 
     private void listGames() {
