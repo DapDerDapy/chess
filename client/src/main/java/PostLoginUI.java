@@ -1,9 +1,15 @@
 import java.util.Scanner;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 
 public class PostLoginUI {
 
     private Scanner scanner;
-    private final String authToken; // Assuming authToken is needed for some API calls
+
+    private String authToken;
 
     // ANSI escape code colors for pretty output
     private final String ANSI_RESET = "\u001B[0m";
@@ -17,6 +23,7 @@ public class PostLoginUI {
     public PostLoginUI(String authToken) {
         this.scanner = new Scanner(System.in);
         this.authToken = authToken;
+        // Assuming authToken is needed for some API calls
     }
 
     public void displayMenu() {
@@ -75,8 +82,31 @@ public class PostLoginUI {
     }
 
     private void logout() {
-        // Implementation of Logout
+        System.out.println(ANSI_GREEN + "Logging out..." + ANSI_RESET);
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/session")) // Adjust the URI to your logout endpoint
+                    .header("Authorization", this.authToken) // Include the authToken in the request header
+                    .DELETE() // Use the DELETE method
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println(ANSI_GREEN + "Logout successful." + ANSI_RESET);
+                // Transition back to PreloginUI
+                this.authToken = null; // Clear authToken
+            } else {
+                // If logout failed, the server response might include the reason which you can display to the user
+                System.out.println(ANSI_RED + "Logout failed: " + response.body() + ANSI_RESET);
+            }
+        } catch (Exception e) {
+            System.out.println(ANSI_RED + "Error during logout: " + e.getMessage() + ANSI_RESET);
+        }
     }
+
 
     private void createGame() {
         // Implementation of Create Game

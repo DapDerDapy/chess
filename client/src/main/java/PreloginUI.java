@@ -112,9 +112,7 @@ public class PreloginUI {
 
             if (response.statusCode() == 200) {
                 // If the login was successful, server should respond with the authToken
-                // Extract authToken and other necessary details here if needed
                 System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
-                // Here you would transition to Postlogin UI and pass along any needed information such as authToken
 
                 String authToken = createAuth(response);
                 PostLoginUI postLoginUI = new PostLoginUI(authToken);
@@ -147,7 +145,7 @@ public class PreloginUI {
             HttpClient client = HttpClient.newHttpClient();
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/user")) // Adjust the port number accordingly
+                    .uri(new URI("http://localhost:8080/user"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
