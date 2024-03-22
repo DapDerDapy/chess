@@ -26,4 +26,6 @@ public class ServerFacadeTests {
         Assertions.assertTrue(true);
     }
 
+
+    // return a result object that returns an error instead of an exception?
 }

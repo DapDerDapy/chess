@@ -3,13 +3,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+import chess.ChessBoard;
 import chess.ChessGame;
 import java.net.http.HttpResponse.BodyHandlers;
 
 public class PostLoginUI {
 
     private Scanner scanner;
-
     private String authToken;
 
     // ANSI escape code colors for pretty output
@@ -112,8 +113,14 @@ public class PostLoginUI {
     private void createGame() {
         // Implementation of Create Game
         // Example of creating a new game - adjust according to your application's logic
-        ChessGame game = new ChessGame(); // Assuming you have a ChessGame class
-        GameUI gameUI = new GameUI(game);
+        //ChessGame game = new ChessGame(); // Assuming you have a ChessGame class
+        //GameUI gameUI = new GameUI(game);
+
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        GameUI gameUI = new GameUI(board);
+
+
         gameUI.displayBoards(); // Or any initial method to start the game interaction
     }
 
@@ -128,6 +135,4 @@ public class PostLoginUI {
     private void joinAsObserver() {
         // Implementation of Join as Observer
     }
-
-    // Additional methods as needed for functionality (e.g., API calls)
 }

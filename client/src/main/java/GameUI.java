@@ -1,28 +1,31 @@
+import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import java.util.Map;
 
 public class GameUI {
-    private ChessGame game; // Assume this exists and has methods to interact with the game
-
+    //private ChessGame game; // Assume this exists and has methods to interact with the game
+    private ChessBoard board;
     // Unicode symbols for chess pieces
-    private final String WHITE_PAWN = "\u2659";
-    private final String BLACK_PAWN = "\u265F";
+    private static final Map<ChessPiece.PieceType, String> whitePieceSymbols = Map.of(
+            ChessPiece.PieceType.PAWN, "♟",
+            ChessPiece.PieceType.KNIGHT, "♞",
+            ChessPiece.PieceType.BISHOP, "♝",
+            ChessPiece.PieceType.ROOK, "♜",
+            ChessPiece.PieceType.QUEEN, "♛",
+            ChessPiece.PieceType.KING, "♚"
+    );
 
-    private final String WHITE_KNIGHT = "\u2658";
-    private final String BLACK_KNIGHT = "\u265E";
-
-    private final String WHITE_BISHOP = "\u2657";
-    private final String BLACK_BISHOP = "\u265D";
-
-    private final String WHITE_ROOK = "\u2656";
-    private final String BLACK_ROOK = "\u265C";
-
-    private final String WHITE_QUEEN = "\u2655";
-    private final String BLACK_QUEEN = "\u265B";
-
-    private final String WHITE_KING = "\u2654";
-    private final String BLACK_KING = "\u265A";
+    // Map for black chess pieces Unicode symbols
+    private static final Map<ChessPiece.PieceType, String> blackPieceSymbols = Map.of(
+            ChessPiece.PieceType.PAWN, "♙",
+            ChessPiece.PieceType.KNIGHT, "♘",
+            ChessPiece.PieceType.BISHOP, "♗",
+            ChessPiece.PieceType.ROOK, "♖",
+            ChessPiece.PieceType.QUEEN, "♕",
+            ChessPiece.PieceType.KING, "♔"
+    );
 
     // ANSI colors for the pieces and the board
     private final String ANSI_RESET = "\u001B[0m";
@@ -32,13 +35,16 @@ public class GameUI {
     private final String ANSI_BLACK = "\u001B[30m";
     private final String ANSI_WHITE = "\u001B[37m";
 
+    private final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
+    private final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+
     // Unicode for the checkerboard
     private final String WHITE_SQUARE = "\u25A1"; // White Square (◻)
     private final String BLACK_SQUARE = "\u25A0"; // Black Square (◼)
 
 
-    public GameUI(ChessGame game) {
-        this.game = game;
+    public GameUI(ChessBoard board) {
+        this.board = board;
     }
 
     // Display the board from both perspectives
@@ -74,68 +80,27 @@ public class GameUI {
         System.out.println("  h g f e d c b a");
     }
 
-
     private void printSquare(char col, int row) {
-        // Calculate the color of the square based on its position
-        boolean isWhiteSquare = (row + col) % 2 == 0;
+        int colIndex = col - 'a' + 1;
+        ChessPosition position = new ChessPosition(row, colIndex);
+        ChessPiece piece = board.getPiece(position);
 
-        // Ensure the board is not null
-        if (game.getBoard() == null) {
-            System.out.print("Error during login: Cannot invoke \"chess.ChessBoard.getPiece(chess.ChessPosition)\" because the return value of \"chess.ChessGame.getBoard()\" is null");
-            return;
-        }
+        // Determine the background color
+        boolean isWhiteSquare = (row + colIndex) % 2 == 0;
+        String backgroundColor = isWhiteSquare ? ANSI_WHITE_BACKGROUND : ANSI_BLACK_BACKGROUND;
 
-        // Get the piece at the current square
-        ChessPiece piece = game.getBoard().getPiece(new ChessPosition(col, row));
-
-        // Get the unicode symbol for the piece or a space if there is no piece
-        String pieceSymbol = piece != null ? getUnicodeSymbol(piece) : " ";
-
-        // Choose the color of the square based on its position
-        String squareColor = isWhiteSquare ? ANSI_WHITE : ANSI_BLACK;
-
-        // Print the square with the piece
-        System.out.print(squareColor + pieceSymbol + ANSI_RESET);
-
-        // After the piece, print an extra space to separate from the next square
-        System.out.print(" ");
+        // Print the chess piece or a space if no piece is present
+        String pieceSymbol = (piece != null) ? getUnicodeSymbol(piece) : "\u2003"; // Two spaces for empty squares
+        System.out.print(backgroundColor +  " " + pieceSymbol + " " + ANSI_RESET);
     }
 
 
     private String getUnicodeSymbol(ChessPiece piece) {
-        // Return the unicode symbol for the piece, assuming you have a method isWhite() to check the color
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            switch (piece.getPieceType()) {
-                case PAWN:
-                    return WHITE_PAWN;
-                case KNIGHT:
-                    return WHITE_KNIGHT;
-                case BISHOP:
-                    return WHITE_BISHOP;
-                case ROOK:
-                    return WHITE_ROOK;
-                case QUEEN:
-                    return WHITE_QUEEN;
-                case KING:
-                    return WHITE_KING;
-            }
+            return whitePieceSymbols.get(piece.getPieceType());
         } else {
-            switch (piece.getPieceType()) {
-                case PAWN:
-                    return BLACK_PAWN;
-                case KNIGHT:
-                    return BLACK_KNIGHT;
-                case BISHOP:
-                    return BLACK_BISHOP;
-                case ROOK:
-                    return BLACK_ROOK;
-                case QUEEN:
-                    return BLACK_QUEEN;
-                case KING:
-                    return BLACK_KING;
-            }
+            return blackPieceSymbols.get(piece.getPieceType());
         }
-        return " "; // If no piece is found or other error occurs
     }
 
 }

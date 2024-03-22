@@ -1134,3 +1134,6 @@ public class WSServer {
 - go to the Connection Manager in PetShop and use similar stuff to make it work
 - WebSocket will pretty much just be used for handling the game itself
   - So nothing to do with pre/post login UI
+
+# 3/20/24
+
