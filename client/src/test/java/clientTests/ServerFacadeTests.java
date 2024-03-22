@@ -1,5 +1,7 @@
 package clientTests;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import server.Server;
@@ -85,7 +87,33 @@ public class ServerFacadeTests {
 
     }
 
+    @Test
+    void createGameSuccess() throws Exception {
 
+        var username = "testUserForCreateGame" + System.currentTimeMillis(); // Ensure unique username
+        var password = "testPassForCreateGame";
+        var email = "testEmailForCreateGame@example.com";
+        Result<String> registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.isSuccess(), "Registration should succeed");
+
+        var gameName = "Test Game " + System.currentTimeMillis(); // Unique game name
+        Result<String> result = facade.createGame(gameName);
+
+        if (result.isSuccess()) {
+            // Assuming the server responds with a JSON containing the game ID
+            JsonObject jsonResponse = JsonParser.parseString(result.getData()).getAsJsonObject();
+            assertTrue(jsonResponse.has("gameId"), "Response should contain a game ID");
+        }
+    }
+
+
+    @Test
+    void createGameFailure() throws Exception {
+        // Assuming there's a way to simulate failure (e.g., invalid game name or not logged in)
+        var gameName = ""; // Potentially invalid game name to trigger failure
+        Result<String> result = facade.createGame(gameName);
+        assertFalse(result.isSuccess(), "Game creation should fail with invalid game name");
+    }
 
 
 

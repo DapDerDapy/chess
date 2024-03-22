@@ -116,12 +116,18 @@ public class PostLoginUI {
         String gameName = scanner.nextLine();
         Result<String> result = serverFacade.createGame(gameName);
         if (result.isSuccess()) {
-            System.out.println("Game created successfully. Game ID: " + result.getData());
+            System.out.println("Game created successfully.");
+            // Optionally display the chessboard
+
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+
+            GameUI gameBoard = new GameUI(board);
+            gameBoard.displayBoards();
         } else {
-            System.out.println(result.getErrorMessage());
+            System.out.println("Failed to create game.");
         }
     }
-
 
     private void listGames() {
         String gamesList = serverFacade.listGames();

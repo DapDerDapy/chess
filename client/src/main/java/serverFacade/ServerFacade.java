@@ -114,7 +114,6 @@ public class ServerFacade {
         }
     }
 
-
     public String listGames() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
