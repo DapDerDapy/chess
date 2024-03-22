@@ -1,3 +1,5 @@
+package ui;
+
 import java.util.Scanner;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -6,6 +8,8 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import serverFacade.ServerFacade;
+import serverFacade.Result;
 
 public class PreloginUI {
 
@@ -20,7 +24,7 @@ public class PreloginUI {
     private final String ANSI_MAGENTA = "\u001B[35m";
     private final String ANSI_RED = "\u001B[31m";
 
-    private ServerFacade serverFacade = new ServerFacade();
+    private ServerFacade serverFacade = new ServerFacade(null);
 
     public PreloginUI() {
         this.scanner = new Scanner(System.in);
@@ -85,84 +89,48 @@ public class PreloginUI {
 
     private void login() {
         System.out.println(ANSI_GREEN + "Please log in:" + ANSI_RESET);
-
-        // Prompt for username
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
-
-        // Prompt for password
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
         try {
-            // Create the JSON body for the login request
-            String requestBody = String.format("{\"username\":\"%s\",\"password\":\"%s\"}", username, password);
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/session")) // Adjust the URI to your login endpoint
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                // If the login was successful, server should respond with the authToken
+            Result<String> result = serverFacade.login(username, password);
+            if (result.isSuccess()) {
+                String authToken = result.getData();
                 System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
-
-                String authToken = createAuth(response);
                 PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
                 postLoginUI.processUserInput();
-
             } else {
-                // If login failed, the server response might include the reason which you can display to the user
-                System.out.println(ANSI_RED + "Login failed: " + response.body() + ANSI_RESET);
+                System.out.println(ANSI_RED + result.getErrorMessage() + ANSI_RESET);
             }
         } catch (Exception e) {
-            System.out.println(ANSI_RED + "Error during login: " + e.getMessage() + ANSI_RESET);
+            System.out.println(ANSI_RED + "Unexpected error during login: " + e.getMessage() + ANSI_RESET);
         }
     }
-
 
 
 
     private void register() {
-        try {
-            System.out.print(ANSI_MAGENTA + "Enter username: " + ANSI_RESET);
-            String username = scanner.nextLine();
-            System.out.print(ANSI_MAGENTA + "Enter email: " + ANSI_RESET);
-            String email = scanner.nextLine();
-            System.out.print(ANSI_MAGENTA + "Enter password: " + ANSI_RESET);
-            String password = scanner.nextLine();
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
 
-            String requestBody = String.format("{\"username\":\"%s\",\"password\":\"%s\",\"email\":\"%s\"}",
-                    username, password, email);
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/user"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                System.out.println("Registration successful. Transitioning to Postlogin UI...");
-                // Transition to Postlogin UI here
-                String authToken = createAuth(response);
-                PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
-                postLoginUI.processUserInput();
-            } else {
-                System.out.println("Registration failed: " + response.body());
-            }
-        } catch (Exception e) {
-            System.out.println("Error during registration: " + e.getMessage());
+        Result<String> result = serverFacade.register(username, password, email);
+        if (result.isSuccess()) {
+            String authToken = result.getData();
+            System.out.println("Registration successful. Transitioning to Postlogin UI...");
+            PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
+            postLoginUI.processUserInput();
+        } else {
+            System.out.println("Registration failed: " + result.getErrorMessage());
         }
     }
+
+
 
     private void quit(){
         System.out.println(ANSI_GREEN + "Goodbye!" + ANSI_RESET);

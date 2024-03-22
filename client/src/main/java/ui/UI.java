@@ -1,4 +1,4 @@
-import dataAccess.AuthDAO;
+package ui;
 
 public class UI {
     private boolean isLoggedIn = false;
