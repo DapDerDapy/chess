@@ -8,14 +8,19 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import dataAccess.DatabaseManager;
 import java.net.http.HttpResponse.BodyHandlers;
 
 public class PostLoginUI {
 
     private Scanner scanner;
-    private String authToken;
     private String username;
+
+    private String authToken;
 
     // ANSI escape code colors for pretty output
     private final String ANSI_RESET = "\u001B[0m";
@@ -28,8 +33,8 @@ public class PostLoginUI {
 
     public PostLoginUI(String authToken, String username) {
         this.scanner = new Scanner(System.in);
-        this.authToken = authToken;
         this.username = username;
+        this.authToken = authToken;
         // Assuming authToken is needed for some API calls
     }
 
@@ -86,6 +91,7 @@ public class PostLoginUI {
         System.out.println("- Type '4' to list all current games.");
         System.out.println("- Type '5' to join a game.");
         System.out.println("- Type '6' to join a game as an observer.");
+        //System.out.println(this.authToken);
     }
 
     private void logout() {
@@ -95,7 +101,7 @@ public class PostLoginUI {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/session")) // Adjust the URI to your logout endpoint
-                    .header("Authorization", this.authToken) // Include the authToken in the request header
+                    .header("Authorization", authToken) // Include the authToken in the request header
                     .DELETE() // Use the DELETE method
                     .build();
 
@@ -104,7 +110,7 @@ public class PostLoginUI {
             if (response.statusCode() == 200) {
                 System.out.println(ANSI_GREEN + "Logout successful." + ANSI_RESET);
                 // Transition back to PreloginUI
-                this.authToken = null; // Clear authToken
+                authToken = null; // Clear authToken
                 PreloginUI preloginUI = new PreloginUI();
                 preloginUI.processUserInput();
 
@@ -122,30 +128,14 @@ public class PostLoginUI {
         System.out.print("Enter game name: ");
         String gameName = scanner.nextLine();
 
-        // Ask for color preference
-        System.out.print("Choose your color (BLACK/WHITE): ");
-        String colorChoice = scanner.nextLine().toUpperCase();
-
-        System.out.println(username);
-
-        // Prepare JSON with username based on color choice
-        String jsonPayload;
-        if ("BLACK".equals(colorChoice)) {
-            jsonPayload = String.format("{\"gameName\":\"%s\", \"black_username\":\"%s\"}", gameName, username);
-        } else if ("WHITE".equals(colorChoice)) {
-            jsonPayload = String.format("{\"gameName\":\"%s\", \"white_username\":\"%s\"}", gameName, username);
-        } else {
-            System.out.println("Invalid color choice. Defaulting to WHITE.");
-            jsonPayload = String.format("{\"gameName\":\"%s\", \"white_username\":\"%s\"}", gameName, username);
-        }
-
-        System.out.println("Starting game as " + colorChoice);
+        // Prepare JSON payload for creating a game with just a name
+        String jsonPayload = String.format("{\"gameName\":\"%s\"}", gameName);
 
         try {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/game")) // Adjust this URI accordingly
-                    .header("Authorization", this.authToken)
+                    .header("Authorization", authToken) // Include authToken in the request
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
@@ -153,7 +143,7 @@ public class PostLoginUI {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                System.out.println("Game created successfully.");
+                System.out.println("Game created successfully. Game ID: " + response.body());
                 ChessBoard board = new ChessBoard();
                 board.resetBoard();
                 GameUI gameUI = new GameUI(board);
@@ -165,6 +155,8 @@ public class PostLoginUI {
             System.out.println("Error during game creation: " + e.getMessage());
         }
     }
+
+
 
 
 
@@ -195,13 +187,21 @@ public class PostLoginUI {
         System.out.print("Enter color (BLACK/WHITE): ");
         String color = scanner.nextLine();
 
+        String jsonPayload;
+        if ("BLACK".equalsIgnoreCase(color)) {
+            jsonPayload = String.format("{\"gameID\":%s, \"black_username\":\"%s\"}", gameId, username);
+        } else {
+            jsonPayload = String.format("{\"gameID\":%s, \"white_username\":\"%s\"}", gameId, username);
+        }
+
+
         try {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/game")) // You might need to adjust this
+                    .uri(new URI("http://localhost:8080/game")) // Ensure this matches your actual join game endpoint
                     .header("Authorization", this.authToken)
                     .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString("{\"gameID\":" + gameId + ",\"color\":\"" + color + "\"}"))
+                    .PUT(HttpRequest.BodyPublishers.ofString(jsonPayload))
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -229,7 +229,7 @@ public class PostLoginUI {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/game"))
-                    .header("Authorization", this.authToken)
+                    .header("Authorization", authToken)
                     .header("Content-Type", "application/json")
                     .PUT(HttpRequest.BodyPublishers.ofString("{\"gameID\":" + gameId + ",\"color\":\"" + "\"}"))
                     .build();
@@ -250,29 +250,5 @@ public class PostLoginUI {
             System.out.println("Error during joining game: " + e.getMessage());
         }
     }
-
-    private String fetchUsername() {
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/users/username")) // Adjust URI to your server's endpoint
-                    .header("Authorization", authToken)
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
-                return responseJson.get("username").getAsString(); // Extract and return username
-            } else {
-                System.out.println("Failed to fetch username: " + response.body());
-            }
-        } catch (Exception e) {
-            System.out.println("Error during fetching username: " + e.getMessage());
-        }
-        return null; // Return null or a default value if fetching fails
-    }
-
 
 }

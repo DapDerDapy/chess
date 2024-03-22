@@ -1,7 +1,4 @@
 import java.util.Scanner;
-import service.UserService;
-import request.*;
-import result.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,8 +6,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
-import dataAccess.AuthDAO;
 
 public class PreloginUI {
 
@@ -25,6 +20,8 @@ public class PreloginUI {
     private final String ANSI_MAGENTA = "\u001B[35m";
     private final String ANSI_RED = "\u001B[31m";
 
+    private ServerFacade serverFacade = new ServerFacade();
+
     public PreloginUI() {
         this.scanner = new Scanner(System.in);
     }
@@ -37,6 +34,7 @@ public class PreloginUI {
         String responseBody = response.body();
         Gson gson = new Gson();
         JsonObject jsonResponse = gson.fromJson(responseBody, JsonObject.class);
+        System.out.println(jsonResponse.get("authToken").getAsString());
         return jsonResponse.get("authToken").getAsString();
     }
 
