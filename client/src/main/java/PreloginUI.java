@@ -68,7 +68,7 @@ public class PreloginUI {
                     register();
                     break;
                 case "4":
-                    keepRunning = false;
+                    quit();
                     break;
                 default:
                     System.out.println(ANSI_RED + "Invalid input. Please try again." + ANSI_RESET);
@@ -164,6 +164,11 @@ public class PreloginUI {
         } catch (Exception e) {
             System.out.println("Error during registration: " + e.getMessage());
         }
+    }
+
+    private void quit(){
+        System.out.println(ANSI_GREEN + "Goodbye!" + ANSI_RESET);
+        System.exit(0);
     }
 
 }

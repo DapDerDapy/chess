@@ -105,6 +105,9 @@ public class PostLoginUI {
                 System.out.println(ANSI_GREEN + "Logout successful." + ANSI_RESET);
                 // Transition back to PreloginUI
                 this.authToken = null; // Clear authToken
+                PreloginUI preloginUI = new PreloginUI();
+                preloginUI.processUserInput();
+
             } else {
                 // If logout failed, the server response might include the reason which you can display to the user
                 System.out.println(ANSI_RED + "Logout failed: " + response.body() + ANSI_RESET);
