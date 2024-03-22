@@ -38,9 +38,9 @@ public class GameUI {
     private final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
     private final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
 
-    // Unicode for the checkerboard
-    private final String WHITE_SQUARE = "\u25A1"; // White Square (◻)
-    private final String BLACK_SQUARE = "\u25A0"; // Black Square (◼)
+    private final String EM_SPACE = "\u2003";
+    private final String BLACK_PERSPECTIVE_LETTERS = "   h " + EM_SPACE + "g "+ EM_SPACE + "f " + EM_SPACE + "e " + EM_SPACE +  "d " + EM_SPACE + "c " + EM_SPACE + "b " +EM_SPACE+ "a";
+    private final String WHITE_PERSPECTIVE_LETTERS = "   a " + EM_SPACE + "b " + EM_SPACE + "c " + EM_SPACE + "d " + EM_SPACE + "e " + EM_SPACE + "f " + EM_SPACE + "g " + EM_SPACE + "h";
 
 
     public GameUI(ChessBoard board) {
@@ -57,7 +57,7 @@ public class GameUI {
     }
 
     private void displayBoardFromWhitePerspective() {
-        System.out.println("  a b c d e f g h");
+        System.out.println(WHITE_PERSPECTIVE_LETTERS);
         for (int row = 8; row >= 1; row--) {
             System.out.print(row + " ");
             for (char col = 'a'; col <= 'h'; col++) {
@@ -65,11 +65,11 @@ public class GameUI {
             }
             System.out.println(" " + row);
         }
-        System.out.println("  a b c d e f g h");
+        System.out.println(WHITE_PERSPECTIVE_LETTERS);
     }
 
     private void displayBoardFromBlackPerspective() {
-        System.out.println("  h g f e d c b a");
+        System.out.println(BLACK_PERSPECTIVE_LETTERS);
         for (int row = 1; row <= 8; row++) {
             System.out.print(row + " ");
             for (char col = 'h'; col >= 'a'; col--) {
@@ -77,7 +77,7 @@ public class GameUI {
             }
             System.out.println(" " + row);
         }
-        System.out.println("  h g f e d c b a");
+        System.out.println(BLACK_PERSPECTIVE_LETTERS);
     }
 
     private void printSquare(char col, int row) {
@@ -90,7 +90,7 @@ public class GameUI {
         String backgroundColor = isWhiteSquare ? ANSI_WHITE_BACKGROUND : ANSI_BLACK_BACKGROUND;
 
         // Print the chess piece or a space if no piece is present
-        String pieceSymbol = (piece != null) ? getUnicodeSymbol(piece) : "\u2003"; // Two spaces for empty squares
+        String pieceSymbol = (piece != null) ? getUnicodeSymbol(piece) : EM_SPACE; // Em-space for empty squares
         System.out.print(backgroundColor +  " " + pieceSymbol + " " + ANSI_RESET);
     }
 

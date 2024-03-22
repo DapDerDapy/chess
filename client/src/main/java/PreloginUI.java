@@ -115,7 +115,7 @@ public class PreloginUI {
                 System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
 
                 String authToken = createAuth(response);
-                PostLoginUI postLoginUI = new PostLoginUI(authToken);
+                PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
                 postLoginUI.processUserInput();
 
             } else {
@@ -156,7 +156,7 @@ public class PreloginUI {
                 System.out.println("Registration successful. Transitioning to Postlogin UI...");
                 // Transition to Postlogin UI here
                 String authToken = createAuth(response);
-                PostLoginUI postLoginUI = new PostLoginUI(authToken);
+                PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
                 postLoginUI.processUserInput();
             } else {
                 System.out.println("Registration failed: " + response.body());

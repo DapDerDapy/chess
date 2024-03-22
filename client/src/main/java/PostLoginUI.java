@@ -6,12 +6,16 @@ import java.net.http.HttpResponse;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.net.http.HttpResponse.BodyHandlers;
 
 public class PostLoginUI {
 
     private Scanner scanner;
     private String authToken;
+    private String username;
 
     // ANSI escape code colors for pretty output
     private final String ANSI_RESET = "\u001B[0m";
@@ -22,9 +26,10 @@ public class PostLoginUI {
     private final String ANSI_PURPLE = "\u001B[35m";
     private final String ANSI_BLUE = "\u001B[34m";
 
-    public PostLoginUI(String authToken) {
+    public PostLoginUI(String authToken, String username) {
         this.scanner = new Scanner(System.in);
         this.authToken = authToken;
+        this.username = username;
         // Assuming authToken is needed for some API calls
     }
 
@@ -111,28 +116,160 @@ public class PostLoginUI {
 
 
     private void createGame() {
-        // Implementation of Create Game
-        // Example of creating a new game - adjust according to your application's logic
-        //ChessGame game = new ChessGame(); // Assuming you have a ChessGame class
-        //GameUI gameUI = new GameUI(game);
+        System.out.print("Enter game name: ");
+        String gameName = scanner.nextLine();
 
-        ChessBoard board = new ChessBoard();
-        board.resetBoard();
-        GameUI gameUI = new GameUI(board);
+        // Ask for color preference
+        System.out.print("Choose your color (BLACK/WHITE): ");
+        String colorChoice = scanner.nextLine().toUpperCase();
 
+        System.out.println(username);
 
-        gameUI.displayBoards(); // Or any initial method to start the game interaction
+        // Prepare JSON with username based on color choice
+        String jsonPayload;
+        if ("BLACK".equals(colorChoice)) {
+            jsonPayload = String.format("{\"gameName\":\"%s\", \"black_username\":\"%s\"}", gameName, username);
+        } else if ("WHITE".equals(colorChoice)) {
+            jsonPayload = String.format("{\"gameName\":\"%s\", \"white_username\":\"%s\"}", gameName, username);
+        } else {
+            System.out.println("Invalid color choice. Defaulting to WHITE.");
+            jsonPayload = String.format("{\"gameName\":\"%s\", \"white_username\":\"%s\"}", gameName, username);
+        }
+
+        System.out.println("Starting game as " + colorChoice);
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/game")) // Adjust this URI accordingly
+                    .header("Authorization", this.authToken)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Game created successfully.");
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                GameUI gameUI = new GameUI(board);
+                gameUI.displayBoards();
+            } else {
+                System.out.println("Failed to create game: " + response.body());
+            }
+        } catch (Exception e) {
+            System.out.println("Error during game creation: " + e.getMessage());
+        }
     }
 
+
+
     private void listGames() {
-        // Implementation of List Games
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/game"))
+                    .header("Authorization", this.authToken)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Available games: " + response.body());
+            } else {
+                System.out.println("Failed to list games: " + response.body());
+            }
+        } catch (Exception e) {
+            System.out.println("Error during listing games: " + e.getMessage());
+        }
     }
 
     private void joinGame() {
-        // Implementation of Join Game
+        System.out.print("Enter game ID to join: ");
+        String gameId = scanner.nextLine();
+        System.out.print("Enter color (BLACK/WHITE): ");
+        String color = scanner.nextLine();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/game")) // You might need to adjust this
+                    .header("Authorization", this.authToken)
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString("{\"gameID\":" + gameId + ",\"color\":\"" + color + "\"}"))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Joined game successfully.");
+                // output default starting position!
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                GameUI gameUI = new GameUI(board);
+                gameUI.displayBoards();
+            } else {
+                System.out.println("Failed to join game: " + response.body());
+            }
+        } catch (Exception e) {
+            System.out.println("Error during joining game: " + e.getMessage());
+        }
     }
 
     private void joinAsObserver() {
-        // Implementation of Join as Observer
+        System.out.print("Enter game ID to join as an Observer: ");
+        String gameId = scanner.nextLine();
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/game"))
+                    .header("Authorization", this.authToken)
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString("{\"gameID\":" + gameId + ",\"color\":\"" + "\"}"))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                System.out.println("Joined game successfully.");
+                // output default starting position!
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                GameUI gameUI = new GameUI(board);
+                gameUI.displayBoards();
+            } else {
+                System.out.println("Failed to join game: " + response.body());
+            }
+        } catch (Exception e) {
+            System.out.println("Error during joining game: " + e.getMessage());
+        }
     }
+
+    private String fetchUsername() {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/users/username")) // Adjust URI to your server's endpoint
+                    .header("Authorization", authToken)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonObject responseJson = JsonParser.parseString(response.body()).getAsJsonObject();
+                return responseJson.get("username").getAsString(); // Extract and return username
+            } else {
+                System.out.println("Failed to fetch username: " + response.body());
+            }
+        } catch (Exception e) {
+            System.out.println("Error during fetching username: " + e.getMessage());
+        }
+        return null; // Return null or a default value if fetching fails
+    }
+
+
 }

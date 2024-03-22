@@ -4,6 +4,8 @@ public class UI {
     private boolean isLoggedIn = false;
     private String authToken = null;
 
+    private String username = null;
+
 
     public void runUI() {
         while (true) {
@@ -14,7 +16,7 @@ public class UI {
                     isLoggedIn = true;
                 }
             } else {
-                PostLoginUI postLoginUI = new PostLoginUI(authToken);
+                PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
                 postLoginUI.processUserInput();
             }
         }
