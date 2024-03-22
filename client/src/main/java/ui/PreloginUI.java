@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import result.RegisterResult;
 import serverFacade.ServerFacade;
 import serverFacade.Result;
 
@@ -98,7 +99,7 @@ public class PreloginUI {
             Result<String> result = serverFacade.login(username, password);
             if (result.isSuccess()) {
                 String authToken = result.getData();
-                System.out.println(ANSI_GREEN + "Login successful. Transitioning to Postlogin UI..." + ANSI_RESET);
+                System.out.println(ANSI_GREEN + "Login successful. Logging you in..." + ANSI_RESET);
                 PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
                 postLoginUI.processUserInput();
             } else {
@@ -119,14 +120,14 @@ public class PreloginUI {
         System.out.print("Enter password: ");
         String password = scanner.nextLine();
 
-        Result<String> result = serverFacade.register(username, password, email);
-        if (result.isSuccess()) {
-            String authToken = result.getData();
+        RegisterResult result = serverFacade.register(username, password, email);
+        if (result.success()) {
+            String authToken = result.authToken();
             System.out.println("Registration successful. Transitioning to Postlogin UI...");
             PostLoginUI postLoginUI = new PostLoginUI(authToken, username);
             postLoginUI.processUserInput();
         } else {
-            System.out.println("Registration failed: " + result.getErrorMessage());
+            System.out.println("Registration failed: " + result.message());
         }
     }
 

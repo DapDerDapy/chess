@@ -31,12 +31,6 @@ public class GameUI {
 
     // ANSI colors for the pieces and the board
     private final String ANSI_RESET = "\u001B[0m";
-    private final String ANSI_RED = "\u001B[31m";
-    private final String ANSI_BLUE = "\u001B[34m";
-
-    private final String ANSI_BLACK = "\u001B[30m";
-    private final String ANSI_WHITE = "\u001B[37m";
-
     private final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
     private final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
 

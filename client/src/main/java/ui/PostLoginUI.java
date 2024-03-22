@@ -1,23 +1,12 @@
 package ui;
 import java.util.Scanner;
+
+import result.GameCreationResult;
+import result.JoinGameResult;
 import serverFacade.ServerFacade;
 import serverFacade.*;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
 import chess.ChessBoard;
-import chess.ChessGame;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import dataAccess.DatabaseManager;
-import java.net.http.HttpResponse.BodyHandlers;
+
 
 public class PostLoginUI {
 
@@ -42,7 +31,6 @@ public class PostLoginUI {
         this.username = username;
         this.authToken = authToken;
         this.serverFacade = new ServerFacade(authToken);
-        // Assuming authToken is needed for some API calls
     }
 
     public void displayMenu() {
@@ -98,7 +86,6 @@ public class PostLoginUI {
         System.out.println("- Type '4' to list all current games.");
         System.out.println("- Type '5' to join a game.");
         System.out.println("- Type '6' to join a game as an observer.");
-        //System.out.println(this.authToken);
     }
     private void logout() {
         Result<Void> result = serverFacade.logout();
@@ -114,8 +101,8 @@ public class PostLoginUI {
     private void createGame() {
         System.out.print("Enter game name: ");
         String gameName = scanner.nextLine();
-        Result<String> result = serverFacade.createGame(gameName);
-        if (result.isSuccess()) {
+        GameCreationResult result = serverFacade.createGame(gameName);
+        if (result.success()) {
             System.out.println("Game created successfully.");
             // Optionally display the chessboard
 
@@ -130,29 +117,49 @@ public class PostLoginUI {
     }
 
     private void listGames() {
-        String gamesList = serverFacade.listGames();
-        System.out.println("Available games: " + gamesList);
+        Result<String> result = serverFacade.listGames();
+        if (result.isSuccess()) {
+            System.out.println("Available games: " + result.getData());
+        } else {
+            System.out.println(result.getErrorMessage());
+        }
     }
 
     private void joinGame() {
         System.out.print("Enter game ID to join: ");
-        String gameId = scanner.nextLine();
-        boolean success = serverFacade.joinGame(gameId);
-        if (success) {
+        int gameId = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.print("Select which Color you would like to play as (BLACK/WHITE): ");
+        String userColor = scanner.nextLine();
+
+        JoinGameResult result = serverFacade.joinGame(gameId, userColor);
+        if (result.success()) {
             System.out.println("Joined game successfully.");
             // Optionally display the chessboard
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+
+            GameUI gameBoard = new GameUI(board);
+            gameBoard.displayBoards();
         } else {
-            System.out.println("Failed to join game.");
+            System.out.println("Failed to join game: " + result.message());
         }
     }
 
     private void joinAsObserver() {
         System.out.print("Enter game ID to join as an Observer: ");
-        String gameId = scanner.nextLine();
-        boolean success = serverFacade.joinAsObserver(gameId);
-        if (success) {
+        int gameId = scanner.nextInt();
+        scanner.nextLine();
+        JoinGameResult result = serverFacade.joinAsObserver(gameId);
+        if (result.success()) {
             System.out.println("Joined game as observer successfully.");
             // Optionally display the chessboard
+            ChessBoard board = new ChessBoard();
+            board.resetBoard();
+
+            GameUI gameBoard = new GameUI(board);
+            gameBoard.displayBoards();
         } else {
             System.out.println("Failed to join game as observer.");
         }

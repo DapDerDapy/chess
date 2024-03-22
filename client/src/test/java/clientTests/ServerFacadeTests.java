@@ -1,9 +1,14 @@
 package clientTests;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import result.GameCreationResult;
+import result.JoinGameResult;
+import result.RegisterResult;
 import server.Server;
 import serverFacade.ServerFacade;
 import serverFacade.Result;
@@ -35,8 +40,8 @@ public class ServerFacadeTests {
         String email = "testEmail@example.com";
 
         // Attempt to register a new user
-        Result<Void> registerResult = facade.register(username, password, email);
-        assertTrue(registerResult.isSuccess());
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success());
     }
 
     @Test
@@ -46,11 +51,11 @@ public class ServerFacadeTests {
         var email = "testEmail@example.com";
 
         // Register a new user
-        Result<String> registerResult = facade.register(username, password, email);
-        assertTrue(registerResult.isSuccess(), "Registration should succeed");
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success(), "Registration should succeed");
 
         // Verify authToken is present
-        String authToken = registerResult.getData();
+        String authToken = registerResult.authToken();
         assertNotNull(authToken, "Auth token should not be null after registration");
 
         // Log in with the new user
@@ -78,45 +83,153 @@ public class ServerFacadeTests {
         var username = "testUserForLogout" + System.currentTimeMillis(); // Ensure unique username
         var password = "testPassForLogout";
         var email = "testEmailForLogout@example.com";
-        Result<String> registerResult = facade.register(username, password, email);
-        assertTrue(registerResult.isSuccess(), "Registration should succeed");
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success(), "Registration should succeed");
 
+        // Assuming ServerFacade can be initialized with an authToken for subsequent operations.
+        ServerFacade logoutFacade = new ServerFacade(registerResult.authToken());
+        Result<Void> result = logoutFacade.logout();
 
-        Result<Void> result = facade.logout();
-        assertFalse(result.isSuccess(), "Logout should be successful");
+        assertTrue(result.isSuccess(), "Logout should be successful");
 
     }
 
     @Test
     void createGameSuccess() throws Exception {
-
+        // Setup for registration and login
         var username = "testUserForCreateGame" + System.currentTimeMillis(); // Ensure unique username
         var password = "testPassForCreateGame";
         var email = "testEmailForCreateGame@example.com";
-        Result<String> registerResult = facade.register(username, password, email);
-        assertTrue(registerResult.isSuccess(), "Registration should succeed");
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success(), "Registration should succeed");
 
+        // Use the authToken for authenticated operations
+        ServerFacade gameFacade = new ServerFacade(registerResult.authToken());
+
+        // Create a new game using the authenticated facade
         var gameName = "Test Game " + System.currentTimeMillis(); // Unique game name
-        Result<String> result = facade.createGame(gameName);
+        GameCreationResult createGameResult = gameFacade.createGame(gameName);
 
-        if (result.isSuccess()) {
-            // Assuming the server responds with a JSON containing the game ID
-            JsonObject jsonResponse = JsonParser.parseString(result.getData()).getAsJsonObject();
-            assertTrue(jsonResponse.has("gameId"), "Response should contain a game ID");
-        }
+        // Check if a game ID (or success message) is returned
+        assertTrue(createGameResult.success(), "Game should be created successfully");
     }
+
 
 
     @Test
     void createGameFailure() throws Exception {
         // Assuming there's a way to simulate failure (e.g., invalid game name or not logged in)
         var gameName = ""; // Potentially invalid game name to trigger failure
-        Result<String> result = facade.createGame(gameName);
-        assertFalse(result.isSuccess(), "Game creation should fail with invalid game name");
+        GameCreationResult result = facade.createGame(gameName);
+        assertFalse(result.success(), "Game creation should fail with invalid game name");
+    }
+
+    @Test
+    void listGamesSuccess() throws Exception {
+        // Setup for registration and login to ensure a valid session
+        var username = "testUserForListGames" + System.currentTimeMillis(); // Ensure unique username
+        var password = "testPassForListGames";
+        var email = "testEmailForListGames@example.com";
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success(), "Registration should succeed");
+
+
+        // Use the authToken for authenticated operations
+        ServerFacade listGamesFacade = new ServerFacade(registerResult.authToken());
+
+        // Attempt to list games using the authenticated facade
+        Result<String> result = listGamesFacade.listGames();
+        assertTrue(result.isSuccess(), "Should successfully list games");
+
+        // Assuming result.getData() returns a JSON string of game data
+        String jsonData = result.getData();
+        assertNotNull(jsonData, "Should return a JSON string of games");
+
+        // Parse the JSON data to verify its structure
+        JsonObject responseObject = JsonParser.parseString(jsonData).getAsJsonObject();
+        assertTrue(responseObject.has("games"), "JSON should have a 'games' array");
+
+        JsonArray gamesArray = responseObject.getAsJsonArray("games");
+        assertNotNull(gamesArray, "The 'games' array should not be null");
+        assertFalse(gamesArray.isEmpty(), "Games list should not be empty");
+    }
+
+    @Test
+    void listGamesFailure() throws Exception {
+        // Directly using an invalid token for this test
+        facade = new ServerFacade("invalidToken");
+        Result<String> result = facade.listGames();
+        assertFalse(result.isSuccess(), "Should fail to list games due to invalid token");
+    }
+
+    @Test
+    void joinGameSuccess() throws Exception {
+        // Setup for registration and login to ensure a valid session
+        var username = "testUserForJoinGame" + System.currentTimeMillis(); // Ensure unique username
+        var password = "testPassForJoinGame";
+        var email = "testEmailForJoinGame@example.com";
+
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success(), "Registration should succeed");
+
+        // Assume you have a way to create or get a valid game ID. Here, we're assuming it's created and known.
+        var gameName = "Test Game " + System.currentTimeMillis();
+        ServerFacade facade = new ServerFacade(registerResult.authToken());
+        GameCreationResult createGameResult = facade.createGame(gameName);
+        assertTrue(createGameResult.success(), "Game creation should be successful");
+        // Assuming the game creation result gives you the game ID
+
+        String userColor = "WHITE"; // Assuming you choose WHITE for this test
+        JoinGameResult joinGameResult = facade.joinGame(createGameResult.gameID(), userColor);
+
+        assertTrue(joinGameResult.success(), "Joining game should be successful");
     }
 
 
 
+    @Test
+    void joinGameFailure() throws Exception {
+        // Assuming setup for a logged-in user
+        int invalidGameId = 0;
+        String userColor = "WHITE"; // or "BLACK"
+
+        // Perform the join game action
+        JoinGameResult result = facade.joinGame(invalidGameId, userColor);
+        assertFalse(result.success(), "Joining game with invalid ID should fail");
+        assertNotNull(result.message(), "Error message should not be null");
+    }
+
+
+
+    @Test
+    void joinGameAsObserverSuccess() throws Exception {
+        // Setup for registration and login to ensure a valid session
+        var username = "testUserForJoinGameAsObserver" + System.currentTimeMillis(); // Ensure unique username
+        var password = "testPassForJoinGameAsObserver";
+        var email = "testEmailForJoinGameAsObserver@example.com";
+
+        RegisterResult registerResult = facade.register(username, password, email);
+        assertTrue(registerResult.success(), "Registration should succeed");
+
+        var gameName = "Test Game " + System.currentTimeMillis();
+        ServerFacade facade = new ServerFacade(registerResult.authToken());
+        GameCreationResult createGameResult = facade.createGame(gameName);
+        assertTrue(createGameResult.success(), "Game creation should be successful");
+
+        JoinGameResult joinGameResult = facade.joinAsObserver(createGameResult.gameID());
+
+        assertTrue(joinGameResult.success(), "Joining game should be successful");
+
+    }
+
+    @Test
+    void JoinGameAsObserverFailure() throws Exception{
+        int invalidGameId = 0;
+        // Perform the join game action
+        JoinGameResult result = facade.joinAsObserver(invalidGameId);
+        assertFalse(result.success(), "Joining game with invalid ID should fail");
+        assertNotNull(result.message(), "Error message should not be null");
+    }
 
     // Additional tests for createGame, listGames, joinGame, and joinAsObserver can follow a similar structure.
 }
