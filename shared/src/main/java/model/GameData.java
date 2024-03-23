@@ -59,4 +59,9 @@ public class GameData {
         this.game = game;
     }
 
+    @Override
+    public String toString() {
+        return "Game ID: " + gameID + ", Game Name: " + gameName + " White Player = " + whiteUsername + " Black Player = " + blackUsername + "\n";
+    }
+
 }

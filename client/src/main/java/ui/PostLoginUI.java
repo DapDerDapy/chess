@@ -1,6 +1,9 @@
 package ui;
+import java.util.Collection;
 import java.util.Scanner;
 
+import com.google.gson.Gson;
+import model.GameData;
 import result.GameCreationResult;
 import result.JoinGameResult;
 import serverFacade.ServerFacade;
@@ -30,7 +33,7 @@ public class PostLoginUI {
         this.scanner = new Scanner(System.in);
         this.username = username;
         this.authToken = authToken;
-        this.serverFacade = new ServerFacade(authToken);
+        this.serverFacade = new ServerFacade(authToken, 8080);
     }
 
     public void displayMenu() {
@@ -117,7 +120,7 @@ public class PostLoginUI {
     }
 
     private void listGames() {
-        Result<String> result = serverFacade.listGames();
+        Result<Collection<GameData>> result = serverFacade.listGames();
         if (result.isSuccess()) {
             System.out.println("Available games: " + result.getData());
         } else {

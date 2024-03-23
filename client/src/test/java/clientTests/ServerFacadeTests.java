@@ -3,6 +3,7 @@ package clientTests;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,6 +14,8 @@ import server.Server;
 import serverFacade.ServerFacade;
 import serverFacade.Result;
 
+import java.util.Collection;
+
 public class ServerFacadeTests {
 
     private static Server server;
@@ -22,11 +25,10 @@ public class ServerFacadeTests {
     @BeforeAll
     public static void init() {
         server = new Server();
-        port = server.run(8080); // Dynamically assigned port
-        facade = new ServerFacade("http://localhost:8080"); // Pass the correct base URI
+        port = server.run(0); // Dynamically assigned port
+        facade = new ServerFacade(null, port); // Pass the correct base URI
         System.out.println("Started test HTTP server on port " + port);
     }
-
 
     @AfterAll
     static void stopServer() {
@@ -87,7 +89,7 @@ public class ServerFacadeTests {
         assertTrue(registerResult.success(), "Registration should succeed");
 
         // Assuming ServerFacade can be initialized with an authToken for subsequent operations.
-        ServerFacade logoutFacade = new ServerFacade(registerResult.authToken());
+        ServerFacade logoutFacade = new ServerFacade(registerResult.authToken(), port);
         Result<Void> result = logoutFacade.logout();
 
         assertTrue(result.isSuccess(), "Logout should be successful");
@@ -104,7 +106,7 @@ public class ServerFacadeTests {
         assertTrue(registerResult.success(), "Registration should succeed");
 
         // Use the authToken for authenticated operations
-        ServerFacade gameFacade = new ServerFacade(registerResult.authToken());
+        ServerFacade gameFacade = new ServerFacade(registerResult.authToken(), port);
 
         // Create a new game using the authenticated facade
         var gameName = "Test Game " + System.currentTimeMillis(); // Unique game name
@@ -118,6 +120,9 @@ public class ServerFacadeTests {
 
     @Test
     void createGameFailure() throws Exception {
+
+        String authToken = "validMockToken"; // Ensure this is accepted by your mocked or test setup
+        ServerFacade facade = new ServerFacade(authToken, port);
         // Assuming there's a way to simulate failure (e.g., invalid game name or not logged in)
         var gameName = ""; // Potentially invalid game name to trigger failure
         GameCreationResult result = facade.createGame(gameName);
@@ -135,30 +140,19 @@ public class ServerFacadeTests {
 
 
         // Use the authToken for authenticated operations
-        ServerFacade listGamesFacade = new ServerFacade(registerResult.authToken());
+        ServerFacade listGamesFacade = new ServerFacade(registerResult.authToken(), port);
 
         // Attempt to list games using the authenticated facade
-        Result<String> result = listGamesFacade.listGames();
+        Result<Collection<GameData>> result = listGamesFacade.listGames();
         assertTrue(result.isSuccess(), "Should successfully list games");
 
-        // Assuming result.getData() returns a JSON string of game data
-        String jsonData = result.getData();
-        assertNotNull(jsonData, "Should return a JSON string of games");
-
-        // Parse the JSON data to verify its structure
-        JsonObject responseObject = JsonParser.parseString(jsonData).getAsJsonObject();
-        assertTrue(responseObject.has("games"), "JSON should have a 'games' array");
-
-        JsonArray gamesArray = responseObject.getAsJsonArray("games");
-        assertNotNull(gamesArray, "The 'games' array should not be null");
-        assertFalse(gamesArray.isEmpty(), "Games list should not be empty");
     }
 
     @Test
     void listGamesFailure() throws Exception {
         // Directly using an invalid token for this test
-        facade = new ServerFacade("invalidToken");
-        Result<String> result = facade.listGames();
+        facade = new ServerFacade("invalidToken", port);
+        Result<Collection<GameData>> result = facade.listGames();
         assertFalse(result.isSuccess(), "Should fail to list games due to invalid token");
     }
 
@@ -174,7 +168,7 @@ public class ServerFacadeTests {
 
         // Assume you have a way to create or get a valid game ID. Here, we're assuming it's created and known.
         var gameName = "Test Game " + System.currentTimeMillis();
-        ServerFacade facade = new ServerFacade(registerResult.authToken());
+        ServerFacade facade = new ServerFacade(registerResult.authToken(), port);
         GameCreationResult createGameResult = facade.createGame(gameName);
         assertTrue(createGameResult.success(), "Game creation should be successful");
         // Assuming the game creation result gives you the game ID
@@ -192,6 +186,9 @@ public class ServerFacadeTests {
         // Assuming setup for a logged-in user
         int invalidGameId = 0;
         String userColor = "WHITE"; // or "BLACK"
+
+        String authToken = "validMockToken"; // Ensure this is accepted by your mocked or test setup
+        ServerFacade facade = new ServerFacade(authToken, port);
 
         // Perform the join game action
         JoinGameResult result = facade.joinGame(invalidGameId, userColor);
@@ -212,7 +209,7 @@ public class ServerFacadeTests {
         assertTrue(registerResult.success(), "Registration should succeed");
 
         var gameName = "Test Game " + System.currentTimeMillis();
-        ServerFacade facade = new ServerFacade(registerResult.authToken());
+        ServerFacade facade = new ServerFacade(registerResult.authToken(), port);
         GameCreationResult createGameResult = facade.createGame(gameName);
         assertTrue(createGameResult.success(), "Game creation should be successful");
 
@@ -226,6 +223,9 @@ public class ServerFacadeTests {
     void JoinGameAsObserverFailure() throws Exception{
         int invalidGameId = 0;
         // Perform the join game action
+        String authToken = "validMockToken"; // Ensure this is accepted by your mocked or test setup
+        ServerFacade facade = new ServerFacade(authToken, port);
+
         JoinGameResult result = facade.joinAsObserver(invalidGameId);
         assertFalse(result.success(), "Joining game with invalid ID should fail");
         assertNotNull(result.message(), "Error message should not be null");

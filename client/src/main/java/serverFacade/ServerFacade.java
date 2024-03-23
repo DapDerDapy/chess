@@ -7,9 +7,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Collection;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import model.GameData;
 import request.GameCreationRequest;
 import request.JoinGameRequest;
 import request.LoginRequest;
@@ -17,19 +19,25 @@ import request.RegisterRequest;
 import result.GameCreationResult;
 import result.JoinGameResult;
 import result.RegisterResult;
+import wrappers.GamesWrapper;
+
 
 public class ServerFacade {
-    private final String serverBaseUri = "http://localhost:8080"; // Change this as necessary
+
     private final String authToken;
 
+    private final int port;
+    private final String serverBaseUri;
+
     private final HttpClient httpClient;
-    private static final String BASE_URL = "http://localhost:8080";
     private final Gson gson = new Gson();
 
-    public ServerFacade(String authToken) {
+    public ServerFacade(String authToken, int port) {
         //this.serverBaseUri = serverBaseUri;
         this.authToken = authToken;
         this.httpClient = HttpClient.newHttpClient();
+        this.port = 8080;
+        this.serverBaseUri = "http://localhost:" + port;
     }
 
     public String createAuth(HttpResponse<String> response){
@@ -80,7 +88,7 @@ public class ServerFacade {
     public Result<Void> logout() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(BASE_URL + "/session"))
+                    .uri(new URI(serverBaseUri + "/session"))
                     .header("Authorization", authToken)
                     .DELETE()
                     .build();
@@ -115,7 +123,7 @@ public class ServerFacade {
     }
 
 
-    public Result<String> listGames() {
+    public Result<Collection<GameData>> listGames() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(serverBaseUri + "/game"))
@@ -125,14 +133,19 @@ public class ServerFacade {
             HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                return Result.success(response.body());
+                Gson gson = new Gson();
+                GamesWrapper gamesWrapper = gson.fromJson(response.body(), GamesWrapper.class);
+                return Result.success(gamesWrapper.getGames());
             } else {
+                // Since failure doesn't need to return data, use Void for the generic type.
                 return Result.failure("Failed to list games: " + response.body());
             }
         } catch (Exception e) {
+            // Similarly, use Void for the generic type on failure.
             return Result.failure("Error during listing games: " + e.getMessage());
         }
     }
+
 
 
     public JoinGameResult joinGame(int gameId, String userColor) {
