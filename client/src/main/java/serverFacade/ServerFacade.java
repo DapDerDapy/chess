@@ -26,7 +26,6 @@ public class ServerFacade {
 
     private final String authToken;
 
-    private final int port;
     private final String serverBaseUri;
 
     private final HttpClient httpClient;
@@ -36,7 +35,6 @@ public class ServerFacade {
         //this.serverBaseUri = serverBaseUri;
         this.authToken = authToken;
         this.httpClient = HttpClient.newHttpClient();
-        this.port = 0;
         this.serverBaseUri = "http://localhost:" + port;
     }
 
