@@ -33,7 +33,7 @@ public class PostLoginUI {
         this.scanner = new Scanner(System.in);
         this.username = username;
         this.authToken = authToken;
-        this.serverFacade = new ServerFacade(authToken, 8080);
+        this.serverFacade = new ServerFacade(authToken, 0);
     }
 
     public void displayMenu() {

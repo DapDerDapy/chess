@@ -25,7 +25,7 @@ public class PreloginUI {
     private final String ANSI_MAGENTA = "\u001B[35m";
     private final String ANSI_RED = "\u001B[31m";
 
-    private ServerFacade serverFacade = new ServerFacade(null, 8080);
+    private ServerFacade serverFacade = new ServerFacade(null, 0);
 
     public PreloginUI() {
         this.scanner = new Scanner(System.in);
