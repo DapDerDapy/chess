@@ -144,8 +144,6 @@ public class ServerFacade {
         }
     }
 
-
-
     public JoinGameResult joinGame(int gameId, String userColor) {
         String requestBody = gson.toJson(new JoinGameRequest(gameId, userColor));
         HttpRequest request = HttpRequest.newBuilder()

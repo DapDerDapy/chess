@@ -61,7 +61,18 @@ public class GameData {
 
     @Override
     public String toString() {
-        return "Game ID: " + gameID + ", Game Name: " + gameName + " White Player = " + whiteUsername + " Black Player = " + blackUsername + "\n";
+        // ANSI Color Codes
+        String ANSI_RESET = "\u001B[0m";
+        String ANSI_CYAN = "\u001B[36m";
+        String ANSI_PURPLE = "\u001B[35m";
+        String ANSI_GREEN = "\u001B[32m";
+        String ANSI_RED = "\u001B[31m";
+
+        return ANSI_CYAN + "Game ID: " + ANSI_RESET + gameID +
+                ANSI_PURPLE + ", Game Name: " + ANSI_RESET + gameName +
+                ANSI_GREEN + ", White Player: " + ANSI_RESET + whiteUsername +
+                ANSI_RED + ", Black Player: " + ANSI_RESET + blackUsername + "\n";
     }
+
 
 }
