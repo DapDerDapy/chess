@@ -21,13 +21,9 @@ import result.JoinGameResult;
 import result.RegisterResult;
 import wrappers.GamesWrapper;
 
-
 public class ServerFacade {
-
     private final String authToken;
-
     private final String serverBaseUri;
-
     private final HttpClient httpClient;
     private final Gson gson = new Gson();
 

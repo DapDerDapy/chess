@@ -93,7 +93,6 @@ public class ServerFacadeTests {
         Result<Void> result = logoutFacade.logout();
 
         assertTrue(result.isSuccess(), "Logout should be successful");
-
     }
 
     @Test
