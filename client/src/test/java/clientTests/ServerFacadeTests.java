@@ -121,7 +121,7 @@ public class ServerFacadeTests {
     @Test
     void createGameFailure() throws Exception {
 
-        String authToken = "validMockToken"; // Ensure this is accepted by your mocked or test setup
+        String authToken = "validMockToken";
         ServerFacade facade = new ServerFacade(authToken, port);
         // Assuming there's a way to simulate failure (e.g., invalid game name or not logged in)
         var gameName = ""; // Potentially invalid game name to trigger failure
@@ -185,9 +185,9 @@ public class ServerFacadeTests {
     void joinGameFailure() throws Exception {
         // Assuming setup for a logged-in user
         int invalidGameId = 0;
-        String userColor = "WHITE"; // or "BLACK"
+        String userColor = "WHITE";
 
-        String authToken = "validMockToken"; // Ensure this is accepted by your mocked or test setup
+        String authToken = "validMockToken";
         ServerFacade facade = new ServerFacade(authToken, port);
 
         // Perform the join game action

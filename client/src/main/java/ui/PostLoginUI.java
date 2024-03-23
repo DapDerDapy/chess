@@ -108,12 +108,14 @@ public class PostLoginUI {
         if (result.success()) {
             System.out.println("Game created successfully.");
             // Optionally display the chessboard
-
+            /*
             ChessBoard board = new ChessBoard();
             board.resetBoard();
 
             GameUI gameBoard = new GameUI(board);
             gameBoard.displayBoards();
+            */
+
         } else {
             System.out.println("Failed to create game.");
         }
