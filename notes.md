@@ -1135,5 +1135,36 @@ public class WSServer {
 - WebSocket will pretty much just be used for handling the game itself
   - So nothing to do with pre/post login UI
 
-# 3/20/24
+# 3/25/24
+## Computer Security
+
+**Important stuff**
+- Data Confidentiality
+- Authentication
+- Data Integrity
+- Non-repudiation
+
+### Cryptographic (one-way) Hash Functions
+
+INPUT: FOX  **-->** Cryptographic hash function **-->** DIGEST: EIFJ 384 DOFE 304A
+- the digest should be deterministic, the same input should always produce the same output
+- also, given the digest and the hash function, people shouldn't be able produce the input.
+
+
+#### Password hashing
+
+- regular password hashing ins't enough for security, hay que add salt!
+- for each user, there is a random SALT value that gets added to the password hash
+- that forces all the hashes to be unique!
+- Salt gets stored in the database. 
+
+
+#### Encryption
+
+- Plaintext: "hello!"
+- CipherTest: "6&eh#8f^7"
+- Key: A sequence of bits used as input to cryptographic algorithm to encode or decode data
+- Key Size: The number of bits in the key, big keys are better!
+  - 128 bits, 2048 bits?
+
 

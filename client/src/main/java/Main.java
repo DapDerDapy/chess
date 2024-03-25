@@ -11,7 +11,6 @@ public class Main {
 
         System.out.println("♕ 240 Chess Client: " + piece);
 
-
         UI ui = new UI();
         ui.runUI();
 
