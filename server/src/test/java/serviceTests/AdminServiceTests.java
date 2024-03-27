@@ -1,65 +1,67 @@
 package serviceTests;
 
-import dataAccess.AuthDAO;
-import dataAccess.GameDAO;
-import dataAccess.UserDAO;
+import dataAccess.MemoryAuthDAO;
+import dataAccess.MemoryGameDAO;
+import dataAccess.MemoryUserDAO;
+import model.UserData;
+import service.AdminService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import service.AdminService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AdminServiceTests {
 
-    @Mock
-    private UserDAO userDAO;
-
-    @Mock
-    private AuthDAO authDAO;
-
-    @Mock
-    private GameDAO gameDAO;
-
     private AdminService adminService;
+    private MemoryUserDAO userDAO;
+    private MemoryAuthDAO authDAO;
+    private MemoryGameDAO gameDAO;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        userDAO = new MemoryUserDAO();
+        authDAO = new MemoryAuthDAO();
+        gameDAO = new MemoryGameDAO();
         adminService = new AdminService(userDAO, authDAO, gameDAO);
     }
 
     @Test
-    void testClearApplicationData() {
-        // Execute the clearApplicationData method
+    void clearApplicationData_ShouldClearAllData() {
+        // Setup - Prepopulate some data
+        userDAO.addUser(new UserData("user1", "password1", "email1"));
+        String authToken = authDAO.createAuth("user1");
+        gameDAO.createGame("ChessGame1", "user1", "user2", null); // Assuming ChessGame can be null for this example
+
+        // Verify setup
+        assertFalse(userDAO.isEmpty());
+        assertTrue(authDAO.isValidToken(authToken));
+        assertFalse(gameDAO.listGames().isEmpty());
+
+        // Action - Call adminService.clearApplicationData()
         adminService.clearApplicationData();
 
-        // Verify that each DAO's clear method is called exactly once
-        verify(userDAO, times(1)).clear();
-        verify(authDAO, times(1)).clearAll();
-        verify(gameDAO, times(1)).clearAll();
+        // Assert - Verify all data has been cleared
+        assertTrue(userDAO.isEmpty());
+        assertFalse(authDAO.isValidToken(authToken)); // Token should no longer be valid
+        assertTrue(gameDAO.listGames().isEmpty());
     }
+
     @Test
-    void testClearApplicationData_WithDaoFailure() {
-        // Simulate a RuntimeException when attempting to clear user data
-        doThrow(new RuntimeException("Failed to clear user data")).when(userDAO).clear();
+    void checkAuth_ValidToken_ReturnsTrue() {
+        // Setup
+        String authToken = authDAO.createAuth("user1");
 
-        // Execute the clearApplicationData method
-        Exception exception = assertThrows(RuntimeException.class, () -> adminService.clearApplicationData());
-
-        // Verify the exception message
-        assertEquals("Failed to clear user data", exception.getMessage());
-
-        // Verify that the clear method was attempted on userDAO
-        verify(userDAO, times(1)).clear();
-
-        // Verify that the clearAll methods on authDAO and gameDAO were not called due to the failure in userDAO
-        verify(authDAO, never()).clearAll();
-        verify(gameDAO, never()).clearAll();
+        // Action & Assert
+        assertTrue(adminService.checkAuth(authToken));
     }
 
-}
+    @Test
+    void checkAuth_InvalidToken_ReturnsFalse() {
+        // Setup - Ensuring no auth tokens are created
 
+        // Action & Assert
+        assertFalse(adminService.checkAuth("invalidToken"));
+    }
+
+    // Add more tests as needed for other methods like getUsernameByToken
+}
