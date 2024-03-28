@@ -1,9 +1,10 @@
 package dataAccessTests;
 
+import dataAccess.MemoryUserDAO;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import dataAccess.MemoryUserDAO;
+
 import static org.junit.jupiter.api.Assertions.*;
 public class MemoryUserDAOTests {
 

@@ -1,13 +1,11 @@
 package dataAccessTests;
 
-import dataAccess.SQLUserDAO;
 import dataAccess.DatabaseManager;
+import dataAccess.SQLUserDAO;
 import model.UserData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterEach;
-
-import javax.xml.crypto.Data;
 
 import static org.junit.jupiter.api.Assertions.*;
 

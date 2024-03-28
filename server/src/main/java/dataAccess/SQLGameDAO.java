@@ -1,12 +1,12 @@
 package dataAccess;
 
-import model.GameData;
 import chess.ChessGame;
+import com.google.gson.Gson;
+import model.GameData;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.google.gson.Gson;
 
 public class SQLGameDAO implements GameDAO {
     private final Gson gson = new Gson();

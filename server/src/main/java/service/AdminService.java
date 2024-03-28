@@ -1,8 +1,8 @@
 package service;
 
 import dataAccess.AuthDAO;
-import dataAccess.UserDAO;
 import dataAccess.GameDAO;
+import dataAccess.UserDAO;
 
 public class AdminService {
     private final UserDAO userDAO;

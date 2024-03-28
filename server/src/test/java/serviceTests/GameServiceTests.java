@@ -4,14 +4,13 @@ import chess.ChessGame;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
-import exceptions.AlreadyTakenException;
-import exceptions.InvalidGameIdException;
 import exceptions.AuthenticationException;
+import exceptions.InvalidGameIdException;
 import model.GameData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import result.JoinGameResult;
 import request.JoinGameRequest;
+import result.JoinGameResult;
 import service.GameService;
 
 import java.util.Collection;

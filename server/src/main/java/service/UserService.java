@@ -1,14 +1,14 @@
 package service;
 
-import dataAccess.UserDAO;
 import dataAccess.AuthDAO;
+import dataAccess.UserDAO;
 import exceptions.AuthenticationException;
 import model.UserData;
-import result.LoginResult;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import request.LoginRequest;
 import request.RegisterRequest;
+import result.LoginResult;
 import result.RegisterResult;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class UserService {
     private final UserDAO userDAO;

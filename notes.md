@@ -1162,9 +1162,39 @@ INPUT: FOX  **-->** Cryptographic hash function **-->** DIGEST: EIFJ 384 DOFE 30
 #### Encryption
 
 - Plaintext: "hello!"
-- CipherTest: "6&eh#8f^7"
+- CipherText: "6&eh#8f^7"
 - Key: A sequence of bits used as input to cryptographic algorithm to encode or decode data
 - Key Size: The number of bits in the key, big keys are better!
   - 128 bits, 2048 bits?
+
+# 3/27/24
+
+- Symmetric and Asymmetric Key Encryption
+  - Advanced Encryption Standard (AES)
+
+```java
+private static SecretKey createAESKey() throws Exception
+{
+    KeyGenerator keyGen =KeyGenerator.getInstance("AES");
+    keyGen.init(256);
+    Secrety key = keyGen.generateKey();
+    return key;
+}
+```
+
+### Public Key Encryption
+- a key pair, generated together!
+- Given one of the keys, it is infeasible to calculate the other key
+
+```java
+import java.security.KeyPairGenerator;
+
+private static SecretKey createAESKeyPair() throws Exception {
+  KeyPairGenerator keyGen = KeyPairGenerator.getInstance("AES");
+  keyPair.init(256);
+  Secrety key = keyGen.generateKey();
+  return key;
+}
+```
 
 

@@ -1,12 +1,14 @@
 package handlers;
 
+import com.google.gson.Gson;
+import exceptions.AuthenticationException;
+import request.LoginRequest;
+import request.RegisterRequest;
+import result.LoginResult;
+import result.RegisterResult;
+import service.UserService;
 import spark.Request;
 import spark.Response;
-import com.google.gson.Gson;
-import service.UserService;
-import result.*;
-import request.*;
-import exceptions.AuthenticationException;
 
 public class UserHandler {
     private final UserService userService;

@@ -1,13 +1,17 @@
 package service;
 
-import dataAccess.GameDAO;
-import dataAccess.AuthDAO;
 import chess.ChessGame;
+import dataAccess.AuthDAO;
+import dataAccess.GameDAO;
 import dataAccess.UserDAO;
+import exceptions.AlreadyTakenException;
+import exceptions.AuthenticationException;
+import exceptions.InvalidGameIdException;
 import model.GameData;
-import exceptions.*;
-import result.*;
-import request.*;
+import request.JoinGameRequest;
+import result.GameCreationResult;
+import result.JoinGameResult;
+
 import java.util.Collection;
 
 

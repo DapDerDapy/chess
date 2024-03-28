@@ -1,10 +1,12 @@
 package dataAccessTests;
 
-import dataAccess.SQLGameDAO;
-import dataAccess.DatabaseManager;
 import chess.ChessGame;
+import dataAccess.DatabaseManager;
+import dataAccess.SQLGameDAO;
 import model.GameData;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 

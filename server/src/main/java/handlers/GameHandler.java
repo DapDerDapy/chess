@@ -1,17 +1,21 @@
 package handlers;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+import exceptions.AlreadyTakenException;
+import exceptions.AuthenticationException;
+import exceptions.InvalidGameIdException;
+import model.GameData;
+import request.GameCreationRequest;
+import request.JoinGameRequest;
+import result.GameCreationResult;
+import result.JoinGameResult;
 import service.AdminService;
 import service.GameService;
+import service.UserService;
 import spark.Request;
 import spark.Response;
-import com.google.gson.Gson;
-import service.UserService;
-import result.*;
-import request.*;
-import chess.ChessGame;
-import exceptions.*;
-import model.GameData;
-import wrappers.*;
+import wrappers.GamesWrapper;
 
 import java.util.Collection;
 
