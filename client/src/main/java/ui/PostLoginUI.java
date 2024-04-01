@@ -95,7 +95,6 @@ public class PostLoginUI {
         if (result.isSuccess()) {
             System.out.println(ANSI_GREEN + "Logout successful." + ANSI_RESET);
             authToken = null; // Clear authToken
-            // Optionally, switch back to PreloginUI
         } else {
             System.out.println(ANSI_RED + "Logout failed: " + result.getErrorMessage() + ANSI_RESET);
         }
@@ -107,15 +106,6 @@ public class PostLoginUI {
         GameCreationResult result = serverFacade.createGame(gameName);
         if (result.success()) {
             System.out.println("Game created successfully.");
-            // Optionally display the chessboard
-            /*
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-
-            GameUI gameBoard = new GameUI(board);
-            gameBoard.displayBoards();
-            */
-
         } else {
             System.out.println("Failed to create game.");
         }
@@ -145,8 +135,9 @@ public class PostLoginUI {
             ChessBoard board = new ChessBoard();
             board.resetBoard();
 
-            GameUI gameBoard = new GameUI(board);
-            gameBoard.displayBoards();
+            GameUI gameBoard = new GameUI(board, userColor);
+            gameBoard.redrawChessboard();
+            gameBoard.processUserInput();
         } else {
             System.out.println("Failed to join game: " + result.message());
         }
@@ -163,7 +154,7 @@ public class PostLoginUI {
             ChessBoard board = new ChessBoard();
             board.resetBoard();
 
-            GameUI gameBoard = new GameUI(board);
+            GameUI gameBoard = new GameUI(board, null);
             gameBoard.displayBoards();
         } else {
             System.out.println("Failed to join game as observer.");
