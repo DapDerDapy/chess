@@ -1197,4 +1197,10 @@ private static SecretKey createAESKeyPair() throws Exception {
 }
 ```
 
+# 4/1/24
 
+## Concurrency
+
+having multiple things going on at the same time
+- having "threads" run in parallel, main may be 1 of them!
+- don't always print ou the same thing! Threads may go at different speeds
