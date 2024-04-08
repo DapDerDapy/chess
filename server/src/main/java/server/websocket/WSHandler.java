@@ -1,4 +1,4 @@
 package server.websocket;
 
-public class Connection {
+public class WSHandler {
 }

@@ -1149,11 +1149,12 @@ public class WSServer {
 INPUT: FOX  **-->** Cryptographic hash function **-->** DIGEST: EIFJ 384 DOFE 304A
 - the digest should be deterministic, the same input should always produce the same output
 - also, given the digest and the hash function, people shouldn't be able produce the input.
+- Never store data like this, because it's not reversible, so you'll never get it back, so don't use it for encryption 
 
 
 #### Password hashing
 
-- regular password hashing ins't enough for security, hay que add salt!
+- regular password hashing isn't enough for security, hay que add salt!
 - for each user, there is a random SALT value that gets added to the password hash
 - that forces all the hashes to be unique!
 - Salt gets stored in the database. 
@@ -1182,7 +1183,7 @@ private static SecretKey createAESKey() throws Exception
 }
 ```
 
-### Public Key Encryption
+### Public Key Encryption (Asymmetric)
 - a key pair, generated together!
 - Given one of the keys, it is infeasible to calculate the other key
 
@@ -1197,6 +1198,10 @@ private static SecretKey createAESKeyPair() throws Exception {
 }
 ```
 
+### Public key Certificate
+- client can verify the identity of the web server
+
+
 # 4/1/24
 
 ## Concurrency
@@ -1204,3 +1209,6 @@ private static SecretKey createAESKeyPair() throws Exception {
 having multiple things going on at the same time
 - having "threads" run in parallel, main may be 1 of them!
 - don't always print ou the same thing! Threads may go at different speeds
+- simiulates multiple threads, works with a single CPU, rotates who uses CPU quickly to make it look like it goes at the same time
+
+
