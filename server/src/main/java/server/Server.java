@@ -4,6 +4,8 @@ import dataAccess.*;
 import handlers.AdminHandler;
 import handlers.GameHandler;
 import handlers.UserHandler;
+import server.websocket.WSHandler;
+import server.websocket.WSServer;
 import service.AdminService;
 import service.GameService;
 import service.UserService;
@@ -11,10 +13,18 @@ import spark.Spark;
 
 public class Server {
 
+    public WSHandler wsHandler;
+
+    public Server() {
+        this.wsHandler = new WSHandler();
+    }
+
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+        Spark.webSocket("/connect", wsHandler);
 
         AuthDAO authDAO = null;
         GameDAO gameDAO = null;

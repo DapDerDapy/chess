@@ -23,5 +23,4 @@ public class WSServer {
         System.out.println("Connection closed: " + session.getId());
     }
 
-    // Additional methods for sending messages to clients, handling errors, etc.
 }
