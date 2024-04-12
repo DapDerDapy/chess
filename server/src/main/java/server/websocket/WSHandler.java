@@ -7,6 +7,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import com.google.gson.Gson;
 import server.websocket.ConnectionManager;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserver;
@@ -64,7 +65,9 @@ public class WSHandler {
         connectionManager.addSession(command.getGameID(), session);
 
         // Send load game message to the joining player
-        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        String game = "Game in load game String!!";
+        ServerMessage loadGameMessage = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
+
         connectionManager.sendMessageToSession(session, gson.toJson(loadGameMessage));
 
         // Notification to all other clients
@@ -76,7 +79,8 @@ public class WSHandler {
         connectionManager.addSession(command.getGameID(), session);
 
         // Load game message to the observer
-        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        String game = "Game in load game String!!";
+        ServerMessage loadGameMessage = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
         connectionManager.sendMessageToSession(session, gson.toJson(loadGameMessage));
 
         // Notification to all other clients
