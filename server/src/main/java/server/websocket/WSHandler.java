@@ -1,96 +1,104 @@
 package server.websocket;
 
-import com.google.gson.Gson;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import com.google.gson.Gson;
+import server.websocket.ConnectionManager;
+import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.Leave;
 import webSocketMessages.userCommands.UserGameCommand;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 
-//@ServerEndpoint("/connect")
+
+
 @WebSocket
 public class WSHandler {
 
-    private ConnectionManager connectionManager = new ConnectionManager();
-    private Gson gson = null;
+    private final ConnectionManager connectionManager = new ConnectionManager();
+    private final Gson gson = new Gson();
 
-    @OnOpen
+    @OnWebSocketConnect
     public void onOpen(Session session) {
-        System.out.println("Session opened, id: " + session.getId());
-        // You might want to associate this session with a specific user
+        System.out.println("Session opened, id: " + session.hashCode());  // Example usage
     }
 
-    @OnMessage
-    public void onMessage(String message, Session session) {
-        UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
-
-        switch (command.getCommandType()) {
-            case JOIN_PLAYER:
-                if (command instanceof JoinPlayer) {
-                    handleJoinPlayer((JoinPlayer) command, session);
-                }
-                break;
-            case JOIN_OBSERVER:
-                if (command instanceof JoinObserver){
-                    handleJoinObserver((JoinObserver) command, session);
-                }
-                break;
-            case LEAVE:
-                if (command instanceof Leave){
-                    handleLeaveGame((Leave) command, session);
-                }
-            // Handle other cases
-        }
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        System.out.println("Closed:");
     }
 
-    @OnClose
-    public void onClose(Session session) {
-        System.out.println("Session closed, id: " + session.getId());
-        // Perform cleanup
-    }
 
-    private void processGameEntry(int gameId, Session session) {
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) {
         try {
-            connectionManager.addSession(gameId, session);
-            ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-            connectionManager.sendMessageToSession(session.getId(), gson.toJson(loadGameMessage));
-
-            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            connectionManager.broadcastToGame(gameId, gson.toJson(notification));
-        } catch (IOException e) {
-            sendError(session, "Error: Failed to process game entry: " + e.getMessage());
+            UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
+            System.out.println("Received command type: " + command.getCommandType());  // Log command type
+            switch (command.getCommandType()) {
+                case JOIN_PLAYER:
+                    handleJoinPlayer(gson.fromJson(message, JoinPlayer.class), session);
+                    break;
+                case JOIN_OBSERVER:
+                    handleJoinObserver(gson.fromJson(message, JoinObserver.class), session);
+                    break;
+                case LEAVE:
+                    handleLeaveGame(gson.fromJson(message, Leave.class), session);
+                    break;
+                default:
+                    sendError(session, "Unsupported command type: " + command.getCommandType());
+                    break;
+            }
+        } catch (Exception e) {
+            System.err.println("Error processing message: " + message + "; Error: " + e.getMessage());
         }
     }
 
-    private void handleJoinPlayer(JoinPlayer command, Session session) {
-        processGameEntry(command.getGameID(), session);
+
+    private void handleJoinPlayer(JoinPlayer command, Session session) throws IOException {
+        connectionManager.addSession(command.getGameID(), session);
+
+        // Send load game message to the joining player
+        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        connectionManager.sendMessageToSession(session, gson.toJson(loadGameMessage));
+
+        // Notification to all other clients
+        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, "Player joined as : "+ command.getPlayerColor());
+        connectionManager.broadcastToGameExcept(command.getGameID(), session, gson.toJson(notification));
     }
 
-    private void handleJoinObserver(JoinObserver command, Session session) {
-        processGameEntry(command.getGameID(), session);
+    private void handleJoinObserver(JoinObserver command, Session session) throws IOException {
+        connectionManager.addSession(command.getGameID(), session);
+
+        // Load game message to the observer
+        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        connectionManager.sendMessageToSession(session, gson.toJson(loadGameMessage));
+
+        // Notification to all other clients
+        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,"Observer joined the game.");
+        connectionManager.broadcastToGameExcept(command.getGameID(), session, gson.toJson(notification));
     }
 
-    private void sendError(Session session, String errorMsg) {
+    private void handleLeaveGame(Leave command, Session session) throws IOException {
+        connectionManager.removeSession(command.getGameID(), session);
+        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,"Player has left the game.");
+        connectionManager.broadcastToGame(command.getGameID(), gson.toJson(notification));
+    }
+
+    private void sendError(Session session, String errorMessage) {
         try {
-            Error error = new Error(errorMsg);
-            connectionManager.sendMessageToSession(session.getId(), gson.toJson(error));
+            System.err.println("Sending error: " + errorMessage);  // Log the specific error message
+            ServerMessage error = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            connectionManager.sendMessageToSession(session, gson.toJson(error));
         } catch (IOException e) {
-            e.printStackTrace();  // To check for something at least
+            System.err.println("Failed to send error message: " + e.getMessage());
         }
     }
-
-    private void handleLeaveGame(Leave command, Session session) {
-        connectionManager.removeSession(command.getGameID(), session); // Assumes removeSession handles all types
-    }
-
 
 
 }
