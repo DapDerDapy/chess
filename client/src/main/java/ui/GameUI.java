@@ -1,19 +1,27 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Scanner;
+import chess.*;
+import com.google.gson.Gson;
+import webSocketMessages.userCommands.Leave;
+import websocket.WSClientEndpoint;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.*;
 
 public class GameUI {
     //private ChessGame game; // Assume this exists and has methods to interact with the game
-    private ChessBoard board;
     private Scanner scanner;
 
     private String userColor;
+
+    private int gameId;
+
+    private String authToken;
+
+    private WSClientEndpoint wsClient;
+
+    private ChessGame game;
 
     // Unicode symbols for chess pieces
     private static final Map<ChessPiece.PieceType, String> whitePieceSymbols = Map.of(
@@ -51,10 +59,13 @@ public class GameUI {
     private final String WHITE_PERSPECTIVE_LETTERS = "   a " + EM_SPACE + "b " + EM_SPACE + "c " + EM_SPACE + "d " + EM_SPACE + "e " + EM_SPACE + "f " + EM_SPACE + "g " + EM_SPACE + "h";
 
 
-    public GameUI(ChessBoard board, String userColor) {
-        this.board = board;
+    public GameUI(String userColor, int gameId, String authToken, URI endpointURI) {
+        this.game = new ChessGame();
         this.userColor = userColor;
         this.scanner = new Scanner(System.in);
+        this.gameId = gameId;
+        this.authToken = authToken;
+        this.wsClient = new WSClientEndpoint(endpointURI, this::updateGame);
     }
 
     public void displayMenu(){
@@ -67,7 +78,10 @@ public class GameUI {
         System.out.print("Please enter your choice: ");
     }
 
-
+    private void updateGame(ChessGame updatedGame) {
+        this.game = updatedGame;
+        redrawChessboard();  // Redraw the board with the updated game state
+    }
 
     public void processUserInput() {
         boolean keepRunning = true;
@@ -84,6 +98,8 @@ public class GameUI {
                     redrawChessboard();
                     break;
                 case "3":
+                    // This is essentially the "Leave" function
+                    leaveGame();
                     keepRunning = false; // Returns to PostLoginUI
                     break;
                 case "4":
@@ -116,13 +132,86 @@ public class GameUI {
         // TODO: take the available squares from the available moves from piecemoves and take those squares and highlight them green
     }
 
+    private void leaveGame() {
+        Leave command = new Leave(authToken, gameId);
+        String message = new Gson().toJson(command);
+        sendWebSocketMessage(message);
+        System.out.println(ANSI_GREEN + "You have left the game." + ANSI_RESET);
+    }
+
+
     private void resignGame() {
 
     }
 
     private void makeMove() {
+        try {
+            System.out.println("What piece would you like to move?");
+            ChessPosition startPosition = promptForPosition();
+            if (startPosition == null) return;  // Error handling or user cancellation.
 
+            ChessPiece piece = game.getBoard().getPiece(startPosition);  // Access the board from ChessGame
+            if (piece == null) {
+                System.out.println("There is no piece at the specified position. Try again.");
+                return;
+            }
+
+            if (!Objects.equals(piece.getTeamColor().toString(), userColor)) {
+                System.out.println("You can't move the opponent's pieces!");
+                return;
+            }
+
+            Collection<ChessMove> availableMoves = piece.pieceMoves(game.getBoard(), startPosition);  // Assuming `pieceMoves` returns legal moves.
+            if (availableMoves.isEmpty()) {
+                System.out.println("No legal moves available for " + piece.getPieceType());
+                return;
+            }
+
+            System.out.println("Selected " + piece.getPieceType() + ". Available moves:");
+            availableMoves.forEach(move -> System.out.println(" " + move.getEndPosition().getRow() + " - " + (char)(move.getEndPosition().getColumn() - 1 + 'a')));
+            System.out.println("Enter the target position for your piece:");
+
+            ChessPosition targetPosition = promptForPosition();
+            if (targetPosition == null) return;
+
+            ChessMove proposedMove = new ChessMove(startPosition, targetPosition, null);
+            game.makeMove(proposedMove);
+
+            System.out.println("Move successful: " + startPosition + " to " + targetPosition);
+        } catch (InvalidMoveException ime) {
+            System.out.println("Invalid move: " + ime.getMessage());
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
+        }
     }
+
+    private ChessPosition promptForPosition() {
+        System.out.print("Column (a-h): ");
+        String colLetter = scanner.nextLine().trim().toLowerCase();
+        if (colLetter.isEmpty() || colLetter.charAt(0) < 'a' || colLetter.charAt(0) > 'h') {
+            System.out.println("Invalid column input. Please enter a letter from a to h.");
+            return null;
+        }
+        int col = colLetter.charAt(0) - 'a' + 1;
+
+        System.out.print("Row (1-8): ");
+        int row;
+        try {
+            row = scanner.nextInt();
+            scanner.nextLine(); // Consume newline left-over
+            if (row < 1 || row > 8) {
+                System.out.println("Invalid row input. Please enter a number from 1 to 8.");
+                return null;
+            }
+        } catch (InputMismatchException ex) {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.nextLine(); // Consume the invalid input
+            return null;
+        }
+
+        return new ChessPosition(row, col);
+    }
+
 
     private void displayHelp() {
         System.out.println(ANSI_CYAN + "Game Help:" + ANSI_RESET);
@@ -170,7 +259,7 @@ public class GameUI {
     private void printSquare(char col, int row) {
         int colIndex = col - 'a' + 1;
         ChessPosition position = new ChessPosition(row, colIndex);
-        ChessPiece piece = board.getPiece(position);
+        ChessPiece piece = game.getBoard().getPiece(position);  // Access the board from ChessGame
 
         // Determine the background color
         boolean isWhiteSquare = (row + colIndex) % 2 == 0;
@@ -179,6 +268,14 @@ public class GameUI {
         // Print the chess piece or a space if no piece is present
         String pieceSymbol = (piece != null) ? getUnicodeSymbol(piece) : EM_SPACE; // Em-space for empty squares
         System.out.print(backgroundColor +  " " + pieceSymbol + " " + ANSI_RESET);
+    }
+
+    private void sendWebSocketMessage(String message) {
+        if (wsClient != null && wsClient.getSession().isOpen()) {
+            wsClient.sendMessage(message);
+        } else {
+            System.out.println("WebSocket connection is not open.");
+        }
     }
 
 

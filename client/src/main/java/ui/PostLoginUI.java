@@ -1,5 +1,7 @@
 package ui;
 import java.net.URI;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Collection;
 import java.util.Scanner;
 
@@ -11,6 +13,7 @@ import result.JoinGameResult;
 import serverFacade.ServerFacade;
 import serverFacade.*;
 import chess.ChessBoard;
+import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
 import websocket.WSClientEndpoint;
 
@@ -24,6 +27,8 @@ public class PostLoginUI {
 
     private String authToken;
 
+    private ChessGame game;
+
     // ANSI escape code colors for pretty output
     private final String ANSI_RESET = "\u001B[0m";
     private final String ANSI_CYAN = "\u001B[36m";
@@ -34,6 +39,7 @@ public class PostLoginUI {
     private final String ANSI_BLUE = "\u001B[34m";
 
     public PostLoginUI(String authToken, String username) {
+        this.game = new ChessGame();
         this.scanner = new Scanner(System.in);
         this.username = username;
         this.authToken = authToken;
@@ -128,52 +134,43 @@ public class PostLoginUI {
         System.out.print("Enter game ID to join: ");
         int gameId = scanner.nextInt();
         scanner.nextLine();
-
         System.out.print("Select which Color you would like to play as (BLACK/WHITE): ");
         String userColor = scanner.nextLine().toUpperCase();
 
-        // Establish WebSocket connection
         JoinGameResult result = serverFacade.joinGame(gameId, userColor);
-        if (result.success()){
+        if (result.success()) {
             try {
                 URI uri = new URI("ws://localhost:8080/connect");
-                WSClientEndpoint clientEndPoint = new WSClientEndpoint(uri);
-
-                // Send join game message
-                String message = new Gson().toJson(new JoinPlayer(authToken, gameId, ChessGame.TeamColor.valueOf(userColor)));
-                clientEndPoint.sendMessage(message);
-
-                // Transition to the gameplay UI
-                ChessBoard board = new ChessBoard();
-                board.resetBoard();
-                GameUI gameBoard = new GameUI(board, userColor);
-                gameBoard.redrawChessboard();
+                GameUI gameBoard = new GameUI(userColor, gameId, authToken, uri);
                 gameBoard.processUserInput();
-
             } catch (Exception e) {
                 System.out.println("WebSocket connection failed: " + e.getMessage());
             }
-        } else{
+        } else {
             System.out.println("Failed to join game: " + result.message());
         }
     }
+
 
     private void joinAsObserver() {
         System.out.print("Enter game ID to join as an Observer: ");
         int gameId = scanner.nextInt();
         scanner.nextLine();
+
         JoinGameResult result = serverFacade.joinAsObserver(gameId);
         if (result.success()) {
-            System.out.println("Joined game as observer successfully.");
-            // Optionally display the chessboard
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
-
-            GameUI gameBoard = new GameUI(board, null);
-            gameBoard.displayBoards();
+            try {
+                URI uri = new URI("ws://localhost:8080/connect");
+                GameUI gameBoard = new GameUI(null, gameId, authToken, uri);
+                gameBoard.displayBoards();
+                gameBoard.processUserInput();
+            } catch (Exception e) {
+                System.out.println("Failed to observe game: " + e.getMessage());
+            }
         } else {
-            System.out.println("Failed to join game as observer.");
+            System.out.println("Failed to join game as observer: " + result.message());
         }
     }
+
 
 }

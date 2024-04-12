@@ -2,14 +2,21 @@ package websocket;
 
 import javax.websocket.*;
 import java.net.URI;
+import java.util.function.Consumer;
+
+import chess.ChessGame;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 @ClientEndpoint
 public class WSClientEndpoint {
 
     private Session userSession = null;
     private MessageHandler messageHandler;
+    private Consumer<ChessGame> gameUpdateHandler;
 
-    public WSClientEndpoint(URI endpointURI) {
+    public WSClientEndpoint(URI endpointURI, Consumer<ChessGame> gameUpdateHandler) {
+        this.gameUpdateHandler = gameUpdateHandler;
         try {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, endpointURI);
@@ -17,6 +24,9 @@ public class WSClientEndpoint {
             System.out.println("WebSocket Client Error: " + e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+    public Session getSession() {
+        return userSession;
     }
 
     @OnOpen
@@ -33,10 +43,16 @@ public class WSClientEndpoint {
 
     @OnMessage
     public void onMessage(String message) {
-        if (this.messageHandler != null) {
-            messageHandler.handleMessage(message);
+        try {
+            ChessGame game = new Gson().fromJson(message, ChessGame.class);
+            if (game != null) {
+                gameUpdateHandler.accept(game);
+            }
+        } catch (JsonSyntaxException e) {
+            System.out.println("Failed to parse incoming message as ChessGame: " + e.getMessage());
         }
     }
+
 
     @OnError
     public void onError(Session session, Throwable throwable) {
