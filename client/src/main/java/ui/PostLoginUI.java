@@ -1,7 +1,9 @@
 package ui;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Scanner;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
 import result.GameCreationResult;
@@ -9,6 +11,8 @@ import result.JoinGameResult;
 import serverFacade.ServerFacade;
 import serverFacade.*;
 import chess.ChessBoard;
+import webSocketMessages.userCommands.JoinPlayer;
+import websocket.WSClientEndpoint;
 
 
 public class PostLoginUI {
@@ -126,19 +130,30 @@ public class PostLoginUI {
         scanner.nextLine();
 
         System.out.print("Select which Color you would like to play as (BLACK/WHITE): ");
-        String userColor = scanner.nextLine();
+        String userColor = scanner.nextLine().toUpperCase();
 
+        // Establish WebSocket connection
         JoinGameResult result = serverFacade.joinGame(gameId, userColor);
-        if (result.success()) {
-            System.out.println("Joined game successfully.");
-            // Optionally display the chessboard
-            ChessBoard board = new ChessBoard();
-            board.resetBoard();
+        if (result.success()){
+            try {
+                URI uri = new URI("ws://localhost:8080/connect");
+                WSClientEndpoint clientEndPoint = new WSClientEndpoint(uri);
 
-            GameUI gameBoard = new GameUI(board, userColor);
-            gameBoard.redrawChessboard();
-            gameBoard.processUserInput();
-        } else {
+                // Send join game message
+                String message = new Gson().toJson(new JoinPlayer(authToken, gameId, ChessGame.TeamColor.valueOf(userColor)));
+                clientEndPoint.sendMessage(message);
+
+                // Transition to the gameplay UI
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                GameUI gameBoard = new GameUI(board, userColor);
+                gameBoard.redrawChessboard();
+                gameBoard.processUserInput();
+
+            } catch (Exception e) {
+                System.out.println("WebSocket connection failed: " + e.getMessage());
+            }
+        } else{
             System.out.println("Failed to join game: " + result.message());
         }
     }

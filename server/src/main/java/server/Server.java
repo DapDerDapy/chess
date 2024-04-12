@@ -24,7 +24,7 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-        Spark.webSocket("/connect", wsHandler);
+        Spark.webSocket("/connect", WSHandler.class);
 
         AuthDAO authDAO = null;
         GameDAO gameDAO = null;
