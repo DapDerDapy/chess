@@ -1,14 +1,14 @@
 package server.websocket;
 import server.Server;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.ServerEndpoint;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 
 
-@ServerEndpoint("/game")
+@WebSocket
 public class WSServer {
 
     public static void startWebSocketServer() {
@@ -26,19 +26,19 @@ public class WSServer {
         }
     }
 
-    @OnOpen
+    @OnWebSocketConnect
     public void onOpen(Session session) {
-        System.out.println("Connection opened: " + session.getId());
+        System.out.println("Connection opened: " + session.getRemoteAddress().getAddress());
     }
 
-    @OnMessage
+    @OnWebSocketMessage
     public void onMessage(String message, Session session) {
-        System.out.println("Message received from " + session.getId() + ": " + message);
+        System.out.println("Message received from " + session.getRemoteAddress().getAddress() + ": " + message);
     }
 
-    @OnClose
-    public void onClose(Session session) {
-        System.out.println("Connection closed: " + session.getId());
+    @OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+        System.out.println("Connection closed: " + session.getRemoteAddress().getAddress() + ", Code: " + statusCode + " Reason: " + reason);
     }
 
 }
