@@ -13,18 +13,12 @@ import spark.Spark;
 
 public class Server {
 
-    public WSHandler wsHandler;
-
-    public Server() {
-        this.wsHandler = new WSHandler();
-    }
-
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-        Spark.webSocket("/connect", WSHandler.class);
+
 
         AuthDAO authDAO = null;
         GameDAO gameDAO = null;
@@ -47,6 +41,10 @@ public class Server {
 
         GameService gameService = new GameService(gameDAO, authDAO, userDAO);
         GameHandler gameHandler = new GameHandler(gameService, userService, adminService);
+
+        WSHandler wsHandler = new WSHandler(gameService, userService);
+
+        Spark.webSocket("/connect", wsHandler);
 
         // Register endpoints
         Spark.post("/session", userHandler::handleLogin);

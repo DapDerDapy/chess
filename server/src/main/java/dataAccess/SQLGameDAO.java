@@ -94,7 +94,6 @@ public class  SQLGameDAO implements GameDAO {
 
             if (color == null || color.isEmpty()) {
                 // Joining as a watcher, assuming there's a watchers table or a way to mark them in game_participants
-                // Adjust this SQL based on your database schema
                 String sqlInsertWatcher = "INSERT INTO game_watchers (game_id, username) VALUES (?, ?);";
                 try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertWatcher)) {
                     pstmt.setInt(1, gameID);

@@ -12,9 +12,6 @@ public class JoinPlayer extends UserGameCommand{
         this.playerColor = playerColor;
     }
 
-    public JoinPlayer(String authToken) {
-        super(authToken);
-    }
 
     public int getGameID() {
         return gameID;
@@ -22,6 +19,10 @@ public class JoinPlayer extends UserGameCommand{
 
     public ChessGame.TeamColor getPlayerColor() {
         return playerColor;
+    }
+
+    public String getAuthToken() {
+        return super.getAuthToken();
     }
 
 }

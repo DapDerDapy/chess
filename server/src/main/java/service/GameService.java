@@ -85,4 +85,7 @@ public class GameService {
         }
     }
 
+    public boolean checkColorTaken( JoinGameRequest request){
+        return gameDAO.isColorTaken(request.gameID(), request.playerColor());
+    }
 }

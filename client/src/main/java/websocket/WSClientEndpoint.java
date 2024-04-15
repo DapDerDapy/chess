@@ -12,21 +12,23 @@ import com.google.gson.JsonSyntaxException;
 public class WSClientEndpoint {
 
     private Session userSession = null;
-    private MessageHandler messageHandler;
-    private Consumer<ChessGame> gameUpdateHandler;
+    private final URI endpointURI;
+    private final Consumer<ChessGame> gameUpdateHandler;
+    private final WebSocketContainer container;
 
     public WSClientEndpoint(URI endpointURI, Consumer<ChessGame> gameUpdateHandler) {
+        this.endpointURI = endpointURI;
         this.gameUpdateHandler = gameUpdateHandler;
+        this.container = ContainerProvider.getWebSocketContainer();
+    }
+
+    public void connect() {
         try {
-            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            container.connectToServer(this, endpointURI);
+            this.container.connectToServer(this, endpointURI);
         } catch (Exception e) {
             System.out.println("WebSocket Client Error: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to connect to WebSocket server at " + endpointURI, e);
         }
-    }
-    public Session getSession() {
-        return userSession;
     }
 
     @OnOpen
@@ -53,25 +55,30 @@ public class WSClientEndpoint {
         }
     }
 
-
     @OnError
     public void onError(Session session, Throwable throwable) {
         System.out.println("WebSocket Client Error: " + throwable.getMessage());
-    }
-
-    public void addMessageHandler(MessageHandler msgHandler) {
-        this.messageHandler = msgHandler;
     }
 
     public void sendMessage(String message) {
         if (this.userSession != null && this.userSession.isOpen()) {
             this.userSession.getAsyncRemote().sendText(message);
         } else {
-            System.out.println("WebSocket connection is not open.");
+            System.out.println("WebSocket connection is not open. Attempting to reconnect...");
+            connect();  // Attempt to reconnect
+            if (this.userSession != null && this.userSession.isOpen()) {
+                this.userSession.getAsyncRemote().sendText(message);
+            } else {
+                System.out.println("Reconnection failed. Message not sent: " + message);
+            }
         }
     }
 
-    public static interface MessageHandler {
-        void handleMessage(String message);
+    public Session getSession() {
+        return userSession;
+    }
+
+    public boolean isConnected() {
+        return this.userSession != null && this.userSession.isOpen();
     }
 }

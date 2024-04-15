@@ -69,7 +69,6 @@ public class ServerFacadeTests {
         assertNotNull(loginAuthToken, "Auth token should not be null after login");
     }
 
-
     // Positive test for logout
     @Test
     void logoutFailure() throws Exception {

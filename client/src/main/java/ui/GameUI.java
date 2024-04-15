@@ -66,6 +66,7 @@ public class GameUI {
         this.gameId = gameId;
         this.authToken = authToken;
         this.wsClient = new WSClientEndpoint(endpointURI, this::updateGame);
+        this.wsClient.connect();
     }
 
     public void displayMenu(){
@@ -274,7 +275,9 @@ public class GameUI {
         if (wsClient != null && wsClient.getSession().isOpen()) {
             wsClient.sendMessage(message);
         } else {
-            System.out.println("WebSocket connection is not open.");
+            System.out.println("WebSocket connection is not open. Attempting to reconnect...");
+            this.wsClient.connect();  // Attempt to reconnect if not connected
+            wsClient.sendMessage(message);  // Resend message after reconnecting
         }
     }
 

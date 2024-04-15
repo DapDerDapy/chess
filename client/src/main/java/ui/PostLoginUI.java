@@ -28,6 +28,8 @@ public class PostLoginUI {
     private String authToken;
 
     private ChessGame game;
+    private WSClientEndpoint wsClient;
+
 
     // ANSI escape code colors for pretty output
     private final String ANSI_RESET = "\u001B[0m";
@@ -44,6 +46,7 @@ public class PostLoginUI {
         this.username = username;
         this.authToken = authToken;
         this.serverFacade = new ServerFacade(authToken, 8080);
+        this.wsClient = null;
     }
 
     public void displayMenu() {
@@ -131,6 +134,7 @@ public class PostLoginUI {
     }
 
     private void joinGame() {
+
         System.out.print("Enter game ID to join: ");
         int gameId = scanner.nextInt();
         scanner.nextLine();
@@ -139,6 +143,7 @@ public class PostLoginUI {
 
         JoinGameResult result = serverFacade.joinGame(gameId, userColor);
         if (result.success()) {
+            System.out.println("SUCCESS!");
             try {
                 URI uri = new URI("ws://localhost:8080/connect");
                 GameUI gameBoard = new GameUI(userColor, gameId, authToken, uri);
@@ -150,7 +155,6 @@ public class PostLoginUI {
             System.out.println("Failed to join game: " + result.message());
         }
     }
-
 
     private void joinAsObserver() {
         System.out.print("Enter game ID to join as an Observer: ");

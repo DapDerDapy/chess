@@ -48,4 +48,9 @@ public class UserGameCommand {
     public int hashCode() {
         return Objects.hash(getCommandType(), getAuthString());
     }
+
+
+    public String getAuthToken(){
+        return authToken;
+    }
 }
