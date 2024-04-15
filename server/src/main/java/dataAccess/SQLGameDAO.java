@@ -160,7 +160,7 @@ public class  SQLGameDAO implements GameDAO {
         }
 
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sqlCheck)) {
+            PreparedStatement pstmt = conn.prepareStatement(sqlCheck)) {
             pstmt.setInt(1, gameID);
 
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -212,5 +212,35 @@ public class  SQLGameDAO implements GameDAO {
             throw new RuntimeException("Error updating game: " + e.getMessage());
         }
     }
+
+    @Override
+    public boolean rejoinPlayer(int gameID, String color, String username) {
+        String sqlCheck = "";
+        if ("BLACK".equalsIgnoreCase(color)) {
+            sqlCheck = "SELECT count(*) FROM games WHERE game_id = ? AND black_username = ?;";
+        } else if ("WHITE".equalsIgnoreCase(color)) {
+            sqlCheck = "SELECT count(*) FROM games WHERE game_id = ? AND white_username = ?;";
+        } else {
+            // If color is neither BLACK nor WHITE, it's an invalid request
+            return false;
+        }
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sqlCheck)) {
+            pstmt.setInt(1, gameID);
+            pstmt.setString(2, username);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0; // If count > 0, then the specified color is already taken by this username
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException("Error checking if player can rejoin: " + e.getMessage());
+        }
+        return false; // Default to false if not found
+    }
+
 
 }

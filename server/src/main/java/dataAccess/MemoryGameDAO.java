@@ -35,6 +35,11 @@ public class MemoryGameDAO implements GameDAO {
         return false; // Default return value if gameID is not found or color does not match
     }
 
+    @Override
+    public boolean rejoinPlayer(int gameID, String color, String username) {
+        return false;
+    }
+
 
     public GameData getGame(int gameID) {
         Optional<GameData> match = gameInfo.stream()

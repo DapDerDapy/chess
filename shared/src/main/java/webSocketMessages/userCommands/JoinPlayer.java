@@ -12,7 +12,6 @@ public class JoinPlayer extends UserGameCommand{
         this.playerColor = playerColor;
     }
 
-
     public int getGameID() {
         return gameID;
     }

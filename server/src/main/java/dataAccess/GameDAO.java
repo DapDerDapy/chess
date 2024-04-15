@@ -19,5 +19,7 @@ public interface GameDAO {
 
     boolean isColorTaken(int gameID, String color);
 
+    boolean rejoinPlayer(int gameID, String color, String username);
+
     void clearAll();
 }

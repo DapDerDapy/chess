@@ -45,7 +45,6 @@ public class WSHandler {
         System.out.println("Closed:");
     }
 
-
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
         try {
@@ -85,6 +84,14 @@ public class WSHandler {
     private void handleJoinPlayer(JoinPlayer command, Session session) throws IOException {
 
         try {
+
+            JoinGameRequest request = new JoinGameRequest(command.getGameID(), command.getPlayerColor().toString());
+            boolean isColorTaken = gameService.checkColorTaken(command.getAuthToken(), request);
+
+            if (!isColorTaken){
+                sendError(session, "Error: Color taken!");
+                return;
+            }
 
             // If successful, proceed to add session and send game state
             connectionManager.addSession(command.getGameID(), session);

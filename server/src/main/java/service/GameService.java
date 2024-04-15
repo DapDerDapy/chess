@@ -85,7 +85,7 @@ public class GameService {
         }
     }
 
-    public boolean checkColorTaken( JoinGameRequest request){
-        return gameDAO.isColorTaken(request.gameID(), request.playerColor());
+    public boolean checkColorTaken(String authToken, JoinGameRequest request){
+        return gameDAO.rejoinPlayer(request.gameID(), request.playerColor(), authDAO.getUsernameFromToken(authToken));
     }
 }
