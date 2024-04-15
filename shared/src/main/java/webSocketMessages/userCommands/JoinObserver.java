@@ -17,4 +17,8 @@ public class JoinObserver extends UserGameCommand {
 
     public int getGameID(){ return gameID; }
 
+    public String getAuthToken() {
+        return super.getAuthToken();
+    }
+
 }

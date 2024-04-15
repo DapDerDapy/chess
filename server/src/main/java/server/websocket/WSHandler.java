@@ -110,6 +110,15 @@ public class WSHandler {
 
 
     private void handleJoinObserver(JoinObserver command, Session session) throws IOException {
+
+
+        boolean canObserverJoin = gameService.joinObserverChecks(command.getGameID(), command.getAuthToken());
+
+        if (!canObserverJoin){
+            sendError(session, "Error: bad GameID or AuthToken");
+            return;
+        }
+
         connectionManager.addSession(command.getGameID(), session);
 
         // Load game message to the observer
@@ -118,8 +127,7 @@ public class WSHandler {
         connectionManager.sendMessageToSession(session, gson.toJson(loadGameMessage));
 
         // Notification to all other clients
-        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,"Observer joined the game.");
-        connectionManager.broadcastToGameExcept(command.getGameID(), session, gson.toJson(notification));
+        Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,"Observer joined the game.");connectionManager.broadcastToGameExcept(command.getGameID(), session, gson.toJson(notification));
     }
 
     private void handleLeaveGame(Leave command, Session session) throws IOException {

@@ -2,6 +2,7 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
+import request.JoinGameRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,11 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public boolean rejoinPlayer(int gameID, String color, String username) {
+        return false;
+    }
+
+    @Override
+    public boolean joinObserverChecks(int gameId, String authToken) {
         return false;
     }
 

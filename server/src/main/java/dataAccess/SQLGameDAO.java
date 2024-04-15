@@ -3,6 +3,7 @@ package dataAccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameData;
+import request.JoinGameRequest;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -241,6 +242,42 @@ public class  SQLGameDAO implements GameDAO {
         }
         return false; // Default to false if not found
     }
+
+    @Override
+    public boolean joinObserverChecks(int gameId, String authToken) {
+        // This SQL checks if the game exists and if the auth token is valid
+        String sql = """
+        SELECT EXISTS(
+            SELECT 1 
+            FROM games 
+            WHERE game_id = ?
+        ) AS game_exists,
+        EXISTS(
+            SELECT 1 
+            FROM auth_tokens 
+            WHERE auth_token = ?
+        ) AS token_valid;
+        """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, gameId);
+            pstmt.setString(2, authToken);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    boolean gameExists = rs.getBoolean("game_exists");
+                    boolean tokenIsValid = rs.getBoolean("token_valid");
+                    return gameExists && tokenIsValid; // Only return true if both are true
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException("Error verifying game existence and token validity: " + e.getMessage());
+        }
+        return false; // Default to false if query fails or no results found
+    }
+
+
 
 
 }

@@ -2,6 +2,7 @@ package dataAccess;
 
 import chess.ChessGame;
 import model.GameData;
+import request.JoinGameRequest;
 
 import java.util.Collection;
 
@@ -20,6 +21,8 @@ public interface GameDAO {
     boolean isColorTaken(int gameID, String color);
 
     boolean rejoinPlayer(int gameID, String color, String username);
+
+    public boolean joinObserverChecks(int gameId, String authToken);
 
     void clearAll();
 }
