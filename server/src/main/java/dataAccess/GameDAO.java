@@ -22,7 +22,9 @@ public interface GameDAO {
 
     boolean rejoinPlayer(int gameID, String color, String username);
 
-    public boolean joinObserverChecks(int gameId, String authToken);
+    boolean joinObserverChecks(int gameId, String authToken);
+
+    ChessGame.TeamColor getPlayerColor(int gameId, String authToken);
 
     void clearAll();
 }

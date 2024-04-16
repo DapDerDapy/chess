@@ -277,6 +277,28 @@ public class  SQLGameDAO implements GameDAO {
         return false; // Default to false if query fails or no results found
     }
 
+    @Override
+    public ChessGame.TeamColor getPlayerColor(int gameId, String username)  {
+        String sql = "SELECT black_username, white_username FROM games WHERE game_id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, gameId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String blackUsername = rs.getString("black_username");
+                String whiteUsername = rs.getString("white_username");
+                if (username.equals(blackUsername)) {
+                    return ChessGame.TeamColor.BLACK;
+                } else if (username.equals(whiteUsername)) {
+                    return ChessGame.TeamColor.WHITE;
+                }
+            }
+            rs.close();
+        } catch (DataAccessException | SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null; // This line means no matching record found, or neither color matches the username
+    }
 
 
 

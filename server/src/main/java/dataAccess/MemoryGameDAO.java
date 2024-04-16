@@ -46,6 +46,11 @@ public class MemoryGameDAO implements GameDAO {
         return false;
     }
 
+    @Override
+    public ChessGame.TeamColor getPlayerColor(int gameId, String authToken) {
+        return null;
+    }
+
 
     public GameData getGame(int gameID) {
         Optional<GameData> match = gameInfo.stream()

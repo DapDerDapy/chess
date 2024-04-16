@@ -74,7 +74,7 @@ public class ChessGame {
     }
 
 
-    private boolean isMoveValid(ChessMove move, ChessBoard board, ChessPosition startPosition){
+    public boolean isMoveValid(ChessMove move, ChessBoard board, ChessPosition startPosition){
 
         Collection<ChessMove> opponentMoves;
 
@@ -232,8 +232,6 @@ public class ChessGame {
         } else if (teamTurn == TeamColor.BLACK){
             teamTurn = TeamColor.WHITE;
         }
-        // Optionally, here you would also switch turns between players
-        //throw new InvalidMoveException("Move would put or leave your king in check.");
 
     }
 

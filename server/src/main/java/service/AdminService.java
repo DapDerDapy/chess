@@ -26,7 +26,6 @@ public class AdminService {
     }
 
     public String getUsernameByToken(String authToken) {
-        // Placeholder for actual implementation
-        return null;
+        return authDAO.getAuth(authToken);
     }
 }

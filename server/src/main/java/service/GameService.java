@@ -92,4 +92,28 @@ public class GameService {
     public boolean joinObserverChecks(int gameId, String authToken){
         return gameDAO.joinObserverChecks(gameId, authToken);
     }
+    public boolean updateGameState(int gameID, ChessGame updatedChessGame) {
+        return gameDAO.updateGame(gameID, updatedChessGame);
+    }
+
+    public ChessGame.TeamColor getPlayerColor(int gameId, String username){
+        return gameDAO.getPlayerColor(gameId, username);
+    }
+
+    public ChessGame getGame(int gameID) {
+        try {
+            GameData gameData = gameDAO.getGame(gameID);
+            if (gameData == null) {
+                return null;  // or throw an appropriate exception if needed
+            }
+            return gameData.getGame();
+        } catch (Exception e) {
+            // Log the exception or handle it as per your error handling policy
+            throw new RuntimeException("Failed to retrieve game: " + e.getMessage(), e);
+        }
+    }
+
+
+
+
 }

@@ -42,7 +42,7 @@ public class Server {
         GameService gameService = new GameService(gameDAO, authDAO, userDAO);
         GameHandler gameHandler = new GameHandler(gameService, userService, adminService);
 
-        WSHandler wsHandler = new WSHandler(gameService, userService);
+        WSHandler wsHandler = new WSHandler(gameService, userService, adminService);
 
         Spark.webSocket("/connect", wsHandler);
 

@@ -1,5 +1,8 @@
 package server.websocket;
 
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -9,6 +12,7 @@ import com.google.gson.Gson;
 import request.JoinGameRequest;
 import result.JoinGameResult;
 import server.websocket.ConnectionManager;
+import service.AdminService;
 import service.GameService;
 import service.UserService;
 import webSocketMessages.serverMessages.LoadGame;
@@ -18,7 +22,7 @@ import webSocketMessages.serverMessages.Error;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
-
+import java.util.Objects;
 
 
 @WebSocket
@@ -30,9 +34,12 @@ public class WSHandler {
     private final GameService gameService;
     private final UserService userService;
 
-    public WSHandler(GameService gameService, UserService userService) {
+    private final AdminService adminService;
+
+    public WSHandler(GameService gameService, UserService userService, AdminService adminService) {
         this.gameService = gameService;
         this.userService = userService;
+        this.adminService = adminService;
     }
 
     @OnWebSocketConnect
@@ -60,9 +67,9 @@ public class WSHandler {
                 case JOIN_PLAYER:
                     handleJoinPlayer(gson.fromJson(message, JoinPlayer.class), session);
                     break;
-                //case MAKE_MOVE:
-                //    handleMakeMove(gson.fromJson(message, MakeMove.class), session);
-                //    break;
+                case MAKE_MOVE:
+                    handleMakeMove(gson.fromJson(message, MakeMove.class), session);
+                    break;
                 default:
                     sendError(session, "Unsupported command type: " + command.getCommandType());
                     break;
@@ -72,12 +79,60 @@ public class WSHandler {
             sendError(session, e.getMessage());
         }
     }
-
     private void handleMakeMove(MakeMove command, Session session) throws IOException {
-        connectionManager.addSession(command.getGameID(), session);
-        String game = "Detailed game state here"; // Fetch actual game state
-        ServerMessage loadGameMessage = new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, game);
-        connectionManager.sendMessageToSession(session, gson.toJson(loadGameMessage));
+
+
+        try {
+            // Retrieve the current game state
+            ChessGame currentGame = gameService.getGame(command.getGameID());
+
+            if (currentGame == null) {
+                sendError(session, "Game not found.");
+                return;
+            }
+
+            ChessPiece piece = currentGame.getBoard().getPiece(command.getMove().getStartPosition());
+
+            // Verify if the move is valid
+            if (!currentGame.isMoveValid(command.getMove(), currentGame.getBoard(), command.getMove().getStartPosition())) {
+                sendError(session, "Invalid move.");
+                return;
+            }
+
+            // Is your Turn / Your piece
+            if (piece.getTeamColor() != currentGame.getTeamTurn()){
+                sendError(session, "Not your piece or turn!");
+                return;
+            }
+
+            System.out.println("adminService.getUsernameByToken(command.getAuthToken()) " + adminService.getUsernameByToken(command.getAuthToken()));
+
+            String username = adminService.getUsernameByToken(command.getAuthToken());
+            ChessGame.TeamColor playerColor = gameService.getPlayerColor(command.getGameID(), username);
+            currentGame.setTeamTurn(playerColor);
+
+            // Apply the move
+            currentGame.makeMove(command.getMove());
+
+            // Update the game state in the database
+            boolean updateSuccess = gameService.updateGameState(command.getGameID(), currentGame);
+            if (!updateSuccess) {
+                sendError(session, "Failed to update game state.");
+                return;
+            }
+
+            // Serialize the updated game state to JSON
+            String updatedGameStateJson = gson.toJson(new LoadGame(ServerMessage.ServerMessageType.LOAD_GAME, gson.toJson(currentGame)));
+
+            // Send LOAD_GAME message to all clients including the root client
+            connectionManager.broadcastToGame(command.getGameID(), updatedGameStateJson);
+
+            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION,"Move has been made!");
+            connectionManager.broadcastToGameExcept(command.getGameID(), session, gson.toJson(notification));
+
+        } catch (Exception e) {
+            sendError(session, "Error processing move: " + e.getMessage());
+        }
     }
 
 
