@@ -101,12 +101,13 @@ public class WSHandler {
             }
 
             // Handle Double Resign!
-            if (currentGame.getTeamTurn() == null){
+            if (Objects.equals(gameService.getGameStatus(command.getGameID()), "Resigned")){
                 sendError(session, "Can't resign the same game twice!");
                 return;
             }
 
-
+            // Resign the game
+            gameService.updateGameStatus(command.getGameID());
 
             // Notify all clients that the game has ended due to resignation
             String notificationMessage = "Game has been resigned by " + adminService.getUsernameByToken(command.getAuthToken());
@@ -127,7 +128,7 @@ public class WSHandler {
             ChessGame currentGame = gameService.getGame(command.getGameID());
             System.out.println("currentGame.getTeamTurn().toString() " + currentGame.getTeamTurn().toString());
 
-            if (currentGame.getTeamTurn() == null){
+            if (Objects.equals(gameService.getGameStatus(command.getGameID()), "Resigned")){
                 sendError(session, "Resigned game! Can't make moves!");
                 return;
             }

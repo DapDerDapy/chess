@@ -163,6 +163,16 @@ public class DatabaseManager {
                         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
                         """;
                 stmt.executeUpdate(sqlCreateGameWatchersTable);
+            } try (Statement stmt = conn.createStatement()) {
+                String sqlCreateGameStatusTable =
+                        """
+                        CREATE TABLE IF NOT EXISTS `game_status` (
+                            `game_id` INT PRIMARY KEY,
+                            `status` VARCHAR(20) DEFAULT 'Active',
+                            FOREIGN KEY (`game_id`) REFERENCES `games`(`game_id`) ON DELETE CASCADE
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+                        """;
+                stmt.executeUpdate(sqlCreateGameStatusTable);
             }
         } catch (SQLException e) {
             throw new DataAccessException("Failed to setup database tables: " + e.getMessage());

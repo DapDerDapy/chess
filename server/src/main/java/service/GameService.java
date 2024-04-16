@@ -96,6 +96,14 @@ public class GameService {
         return gameDAO.updateGame(gameID, updatedChessGame);
     }
 
+    public void updateGameStatus(int gameId){
+        gameDAO.updateGameStatus(gameId, "Resigned");
+    }
+
+    public String getGameStatus(int gameId){
+        return gameDAO.getGameStatus(gameId);
+    }
+
     public ChessGame.TeamColor getPlayerColor(int gameId, String username){
         return gameDAO.getPlayerColor(gameId, username);
     }

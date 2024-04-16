@@ -300,5 +300,39 @@ public class  SQLGameDAO implements GameDAO {
         return null; // This line means no matching record found, or neither color matches the username
     }
 
+    @Override
+    public void updateGameStatus(int gameID, String status)  {
+        String sql = "INSERT INTO game_status (game_id, status) VALUES (?, ?) ON DUPLICATE KEY UPDATE status = ?;";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, gameID);
+            pstmt.setString(2, status);
+            pstmt.setString(3, status);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating game status: " + e.getMessage());
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String getGameStatus(int gameID) {
+        String sql = "SELECT status FROM game_status WHERE game_id = ?;";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, gameID);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("status");
+                }
+                return "Active";  // Default to Active if no status is found
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException("Error retrieving game status: " + e.getMessage());
+        }
+    }
+
+
 
 }

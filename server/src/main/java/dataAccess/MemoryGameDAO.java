@@ -51,6 +51,16 @@ public class MemoryGameDAO implements GameDAO {
         return null;
     }
 
+    @Override
+    public String getGameStatus(int gameID) {
+        return null;
+    }
+
+    @Override
+    public void updateGameStatus(int gameID, String status) {
+
+    }
+
 
     public GameData getGame(int gameID) {
         Optional<GameData> match = gameInfo.stream()

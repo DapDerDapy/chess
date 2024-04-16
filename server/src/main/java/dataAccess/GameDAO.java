@@ -26,5 +26,8 @@ public interface GameDAO {
 
     ChessGame.TeamColor getPlayerColor(int gameId, String authToken);
 
+    String getGameStatus(int gameID);
+
+    void updateGameStatus(int gameID, String status);
     void clearAll();
 }
