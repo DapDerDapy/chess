@@ -10,7 +10,6 @@ import java.net.URI;
 import java.util.*;
 
 public class GameUI {
-    //private ChessGame game; // Assume this exists and has methods to interact with the game
     private Scanner scanner;
 
     private String userColor;
@@ -53,6 +52,10 @@ public class GameUI {
     private final String ANSI_BLUE = "\u001B[34m";
     private final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
     private final String ANSI_BLACK_BACKGROUND = "\u001B[40m";
+
+    private final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+    private final String ANSI_DARK_GREEN_BACKGROUND = "\u001B[102m";
+
 
     private final String EM_SPACE = "\u2003";
     private final String BLACK_PERSPECTIVE_LETTERS = "   h " + EM_SPACE + "g "+ EM_SPACE + "f " + EM_SPACE + "e " + EM_SPACE +  "d " + EM_SPACE + "c " + EM_SPACE + "b " +EM_SPACE+ "a";
@@ -120,7 +123,7 @@ public class GameUI {
     }
 
     public void redrawChessboard() {
-        redrawChessboard(Collections.emptySet()); // Call the overloaded method without highlights
+        redrawChessboard(Collections.emptySet()); // Call the overloaded method without highlights for the first time
     }
 
     public void redrawChessboard(Set<ChessPosition> highlightPositions) {
@@ -129,7 +132,7 @@ public class GameUI {
         } else if (Objects.equals(userColor, "BLACK")) {
             displayBoardFromBlackPerspective(highlightPositions);
         } else {
-            displayBoards(highlightPositions);; // Adjust this method similarly if needed
+            displayBoards(highlightPositions);
         }
     }
 
@@ -297,10 +300,11 @@ public class GameUI {
     private String determineBackgroundColor(int row, int colIndex, boolean isHighlight) {
         boolean isWhiteSquare = (row + colIndex) % 2 == 0;
         if (isHighlight) {
-            return ANSI_GREEN;  // Shows up empty, but it's kinda highlighted I guess;
+            return isWhiteSquare ?  ANSI_DARK_GREEN_BACKGROUND : ANSI_GREEN_BACKGROUND;
         }
         return isWhiteSquare ? ANSI_WHITE_BACKGROUND : ANSI_BLACK_BACKGROUND;
     }
+
 
     private void sendWebSocketMessage(String message) {
         if (wsClient != null && wsClient.isConnected()) {

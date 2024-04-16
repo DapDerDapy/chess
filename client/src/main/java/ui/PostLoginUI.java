@@ -145,6 +145,7 @@ public class PostLoginUI {
             Result<ChessGame> gameStateResult = serverFacade.getGameState(gameId);
             if (gameStateResult.isSuccess()) {
                 ChessGame game = gameStateResult.getData();
+                System.out.println("game = " + game);
                 System.out.println("Successfully joined game.");
                 try {
                     URI uri = new URI("ws://localhost:8080/connect");
@@ -172,6 +173,7 @@ public class PostLoginUI {
             Result<ChessGame> gameStateResult = serverFacade.getGameState(gameId);
             if (gameStateResult.isSuccess()) {
                 ChessGame game = gameStateResult.getData();
+                System.out.println("game = " + game);
                 System.out.println("Successfully joined game.");
                 try {
                     URI uri = new URI("ws://localhost:8080/connect");
