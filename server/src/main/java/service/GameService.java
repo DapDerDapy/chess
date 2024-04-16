@@ -100,6 +100,7 @@ public class GameService {
         return gameDAO.getPlayerColor(gameId, username);
     }
 
+
     public ChessGame getGame(int gameID) {
         try {
             GameData gameData = gameDAO.getGame(gameID);

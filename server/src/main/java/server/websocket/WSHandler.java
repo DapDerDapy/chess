@@ -70,6 +70,9 @@ public class WSHandler {
                 case MAKE_MOVE:
                     handleMakeMove(gson.fromJson(message, MakeMove.class), session);
                     break;
+                case RESIGN:
+                    handleResign(gson.fromJson(message, Resign.class), session);
+                    break;
                 default:
                     sendError(session, "Unsupported command type: " + command.getCommandType());
                     break;
@@ -79,12 +82,55 @@ public class WSHandler {
             sendError(session, e.getMessage());
         }
     }
+
+    private void handleResign(Resign command, Session session) throws IOException {
+        try {
+            // Retrieve the current game state
+            ChessGame currentGame = gameService.getGame(command.getGameID());
+            if (currentGame == null) {
+                sendError(session, "Game not found.");
+                return;
+            }
+
+            // Observer tries to resign
+            String username = adminService.getUsernameByToken(command.getAuthToken());
+            ChessGame.TeamColor playerColor = gameService.getPlayerColor(command.getGameID(), username);
+            if (playerColor == null){
+                sendError(session, "Observer cannot resign!");
+                return;
+            }
+
+            // Handle Double Resign!
+            if (currentGame.getTeamTurn() == null){
+                sendError(session, "Can't resign the same game twice!");
+                return;
+            }
+
+
+
+            // Notify all clients that the game has ended due to resignation
+            String notificationMessage = "Game has been resigned by " + adminService.getUsernameByToken(command.getAuthToken());
+            Notification notification = new Notification(ServerMessage.ServerMessageType.NOTIFICATION, notificationMessage);
+            connectionManager.broadcastToGame(command.getGameID(), gson.toJson(notification));
+
+        } catch (Exception e) {
+            sendError(session, "Error processing resignation: " + e.getMessage());
+        }
+    }
+
+
     private void handleMakeMove(MakeMove command, Session session) throws IOException {
 
 
         try {
             // Retrieve the current game state
             ChessGame currentGame = gameService.getGame(command.getGameID());
+            System.out.println("currentGame.getTeamTurn().toString() " + currentGame.getTeamTurn().toString());
+
+            if (currentGame.getTeamTurn() == null){
+                sendError(session, "Resigned game! Can't make moves!");
+                return;
+            }
 
             if (currentGame == null) {
                 sendError(session, "Game not found.");
