@@ -59,8 +59,8 @@ public class GameUI {
     private final String WHITE_PERSPECTIVE_LETTERS = "   a " + EM_SPACE + "b " + EM_SPACE + "c " + EM_SPACE + "d " + EM_SPACE + "e " + EM_SPACE + "f " + EM_SPACE + "g " + EM_SPACE + "h";
 
 
-    public GameUI(String userColor, int gameId, String authToken, URI endpointURI) {
-        this.game = new ChessGame();
+    public GameUI(String userColor, int gameId, String authToken, URI endpointURI, ChessGame game) {
+        this.game = game;
         this.userColor = userColor;
         this.scanner = new Scanner(System.in);
         this.gameId = gameId;
@@ -119,19 +119,40 @@ public class GameUI {
         }
     }
 
-    public void redrawChessboard(){
+    public void redrawChessboard() {
+        redrawChessboard(Collections.emptySet()); // Call the overloaded method without highlights
+    }
+
+    public void redrawChessboard(Set<ChessPosition> highlightPositions) {
         if (Objects.equals(userColor, "WHITE")){
-            displayBoardFromWhitePerspective();
+            displayBoardFromWhitePerspective(highlightPositions);
         } else if (Objects.equals(userColor, "BLACK")) {
-            displayBoardFromBlackPerspective();
+            displayBoardFromBlackPerspective(highlightPositions);
         } else {
-            displayBoards();;
+            displayBoards(highlightPositions);; // Adjust this method similarly if needed
         }
     }
 
     private void highlightLegalMoves() {
-        // TODO: take the available squares from the available moves from piecemoves and take those squares and highlight them green
+        System.out.println("Select a piece to highlight legal moves.");
+        ChessPosition position = promptForPosition();
+        if (position == null) return; // User cancelled or invalid input
+
+        ChessPiece piece = game.getBoard().getPiece(position);
+        if (piece == null) {
+            System.out.println("No piece at the specified position.");
+            return;
+        }
+
+        Collection<ChessMove> legalMoves = piece.pieceMoves(game.getBoard(), position);
+        Set<ChessPosition> legalPositions = new HashSet<>();
+        for (ChessMove move : legalMoves) {
+            legalPositions.add(move.getEndPosition());
+        }
+
+        redrawChessboard(legalPositions); // Redraw the board with highlighted moves
     }
+
 
     private void leaveGame() {
         Leave command = new Leave(authToken, gameId);
@@ -225,61 +246,76 @@ public class GameUI {
     }
 
     // Display the board from both perspectives
-    public void displayBoards() {
+// Display the board from both perspectives
+    public void displayBoards(Set<ChessPosition> highlightPositions) {
         System.out.println("From White's Perspective:");
-        displayBoardFromWhitePerspective();
+        displayBoardFromWhitePerspective(highlightPositions);
         System.out.println(); // Add a separator between the two boards
         System.out.println("From Black's Perspective:");
-        displayBoardFromBlackPerspective();
+        displayBoardFromBlackPerspective(highlightPositions);
     }
 
-    private void displayBoardFromWhitePerspective() {
+
+    private void displayBoardFromWhitePerspective(Set<ChessPosition> highlightPositions) {
         System.out.println(WHITE_PERSPECTIVE_LETTERS);
         for (int row = 8; row >= 1; row--) {
             System.out.print(row + " ");
             for (char col = 'a'; col <= 'h'; col++) {
-                printSquare(col, row);
+                printSquare(col, row, highlightPositions);
             }
             System.out.println(" " + row);
         }
         System.out.println(WHITE_PERSPECTIVE_LETTERS);
     }
 
-    private void displayBoardFromBlackPerspective() {
+    private void displayBoardFromBlackPerspective(Set<ChessPosition> highlightPositions) {
         System.out.println(BLACK_PERSPECTIVE_LETTERS);
         for (int row = 1; row <= 8; row++) {
             System.out.print(row + " ");
             for (char col = 'h'; col >= 'a'; col--) {
-                printSquare(col, row);
+                printSquare(col, row, highlightPositions);
             }
             System.out.println(" " + row);
         }
         System.out.println(BLACK_PERSPECTIVE_LETTERS);
     }
 
-    private void printSquare(char col, int row) {
+    private void printSquare(char col, int row, Set<ChessPosition> highlightPositions) {
         int colIndex = col - 'a' + 1;
         ChessPosition position = new ChessPosition(row, colIndex);
-        ChessPiece piece = game.getBoard().getPiece(position);  // Access the board from ChessGame
+        ChessPiece piece = game.getBoard().getPiece(position);
 
-        // Determine the background color
+        boolean isHighlight = highlightPositions.contains(position);
+        String backgroundColor = determineBackgroundColor(row, colIndex, isHighlight);
+
+        String pieceSymbol = (piece != null) ? getUnicodeSymbol(piece) : EM_SPACE;
+        System.out.print(backgroundColor + " " + pieceSymbol + " " + ANSI_RESET);
+
+    }
+
+
+    private String determineBackgroundColor(int row, int colIndex, boolean isHighlight) {
         boolean isWhiteSquare = (row + colIndex) % 2 == 0;
-        String backgroundColor = isWhiteSquare ? ANSI_WHITE_BACKGROUND : ANSI_BLACK_BACKGROUND;
-
-        // Print the chess piece or a space if no piece is present
-        String pieceSymbol = (piece != null) ? getUnicodeSymbol(piece) : EM_SPACE; // Em-space for empty squares
-        System.out.print(backgroundColor +  " " + pieceSymbol + " " + ANSI_RESET);
+        if (isHighlight) {
+            return ANSI_GREEN;  // Shows up empty, but it's kinda highlighted I guess;
+        }
+        return isWhiteSquare ? ANSI_WHITE_BACKGROUND : ANSI_BLACK_BACKGROUND;
     }
 
     private void sendWebSocketMessage(String message) {
-        if (wsClient != null && wsClient.getSession().isOpen()) {
+        if (wsClient != null && wsClient.isConnected()) {
             wsClient.sendMessage(message);
         } else {
             System.out.println("WebSocket connection is not open. Attempting to reconnect...");
-            this.wsClient.connect();  // Attempt to reconnect if not connected
-            wsClient.sendMessage(message);  // Resend message after reconnecting
+            wsClient.connect();  // Attempt to reconnect if not connected
+            if (wsClient.isConnected()) {
+                wsClient.sendMessage(message);  // Resend message after reconnecting
+            } else {
+                System.out.println("Reconnection failed. Message not sent: " + message);
+            }
         }
     }
+
 
 
     private String getUnicodeSymbol(ChessPiece piece) {

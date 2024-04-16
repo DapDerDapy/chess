@@ -9,6 +9,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Collection;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import model.GameData;
@@ -175,6 +176,20 @@ public class ServerFacade {
             return gson.fromJson(response.body(), JoinGameResult.class);
         } catch (Exception e) {
             return new JoinGameResult(false, "join failed!!!");
+        }
+    }
+
+    public Result<ChessGame> getGameState(int gameId) {
+        Result<Collection<GameData>> gamesResult = listGames();
+        if (gamesResult.isSuccess()) {
+            for (GameData gameData : gamesResult.getData()) {
+                if (gameData.getGameID() == gameId) {
+                    return Result.success(gameData.getGame());
+                }
+            }
+            return Result.failure("Game with ID " + gameId + " not found.");
+        } else {
+            return Result.failure("Failed to retrieve games: " + gamesResult.getErrorMessage());
         }
     }
 

@@ -72,6 +72,11 @@ public class GameService {
             throw new InvalidGameIdException("error: Invalid game ID: " + request.gameID());
         }
 
+        // Check if the player is already in the game but has left
+        if (checkColorTaken(authToken, request)){
+            return new JoinGameResult(true, "Rejoined game!");
+        }
+
         boolean colorTaken = gameDAO.isColorTaken(request.gameID(), request.playerColor());
         if (colorTaken) {
             throw new AlreadyTakenException("error: Color already taken.");

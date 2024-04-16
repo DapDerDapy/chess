@@ -239,13 +239,9 @@ public class WSHandler {
     }
 
     private void sendError(Session session, String errorMessage) {
-        try {
-            System.err.println("Sending error: " + errorMessage);  // Log the specific error message
-            ServerMessage error = new Error(ServerMessage.ServerMessageType.ERROR, "Error!");
-            connectionManager.sendMessageToSession(session, gson.toJson(error));
-        } catch (IOException e) {
-            System.err.println("Failed to send error message: " + e.getMessage());
-        }
+        System.err.println("Sending error: " + errorMessage);  // Log the specific error message
+        ServerMessage error = new Error(ServerMessage.ServerMessageType.ERROR, "Error!");
+        connectionManager.sendMessageToSession(session, gson.toJson(error));
     }
 
 

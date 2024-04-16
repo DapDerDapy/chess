@@ -134,27 +134,33 @@ public class PostLoginUI {
     }
 
     private void joinGame() {
-
         System.out.print("Enter game ID to join: ");
         int gameId = scanner.nextInt();
         scanner.nextLine();
         System.out.print("Select which Color you would like to play as (BLACK/WHITE): ");
         String userColor = scanner.nextLine().toUpperCase();
 
-        JoinGameResult result = serverFacade.joinGame(gameId, userColor);
-        if (result.success()) {
-            System.out.println("SUCCESS!");
-            try {
-                URI uri = new URI("ws://localhost:8080/connect");
-                GameUI gameBoard = new GameUI(userColor, gameId, authToken, uri);
-                gameBoard.processUserInput();
-            } catch (Exception e) {
-                System.out.println("WebSocket connection failed: " + e.getMessage());
+        JoinGameResult joinResult = serverFacade.joinGame(gameId, userColor);
+        if (joinResult.success()) {
+            Result<ChessGame> gameStateResult = serverFacade.getGameState(gameId);
+            if (gameStateResult.isSuccess()) {
+                ChessGame game = gameStateResult.getData();
+                System.out.println("Successfully joined game.");
+                try {
+                    URI uri = new URI("ws://localhost:8080/connect");
+                    GameUI gameBoard = new GameUI(userColor, gameId, authToken, uri, game);
+                    gameBoard.processUserInput();
+                } catch (Exception e) {
+                    System.out.println("WebSocket connection failed: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Failed to load game state: " + gameStateResult.getErrorMessage());
             }
         } else {
-            System.out.println("Failed to join game: " + result.message());
+            System.out.println("Failed to join game: " + joinResult.message());
         }
     }
+
 
     private void joinAsObserver() {
         System.out.print("Enter game ID to join as an Observer: ");
@@ -163,16 +169,22 @@ public class PostLoginUI {
 
         JoinGameResult result = serverFacade.joinAsObserver(gameId);
         if (result.success()) {
-            try {
-                URI uri = new URI("ws://localhost:8080/connect");
-                GameUI gameBoard = new GameUI(null, gameId, authToken, uri);
-                gameBoard.displayBoards();
-                gameBoard.processUserInput();
-            } catch (Exception e) {
-                System.out.println("Failed to observe game: " + e.getMessage());
+            Result<ChessGame> gameStateResult = serverFacade.getGameState(gameId);
+            if (gameStateResult.isSuccess()) {
+                ChessGame game = gameStateResult.getData();
+                System.out.println("Successfully joined game.");
+                try {
+                    URI uri = new URI("ws://localhost:8080/connect");
+                    GameUI gameBoard = new GameUI(null, gameId, authToken, uri, game);
+                    gameBoard.processUserInput();
+                } catch (Exception e) {
+                    System.out.println("WebSocket connection failed: " + e.getMessage());
+                }
+            } else {
+                System.out.println("Failed to load game state: " + gameStateResult.getErrorMessage());
             }
         } else {
-            System.out.println("Failed to join game as observer: " + result.message());
+            System.out.println("Failed to join game as Observer: " + result.message());
         }
     }
 

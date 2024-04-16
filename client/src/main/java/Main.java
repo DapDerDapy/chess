@@ -1,5 +1,5 @@
 
-/*
+
 import chess.*;
 
 import ui.*;
@@ -20,4 +20,4 @@ public class Main {
         ui.runUI();
 
     }
-}*/
+}
