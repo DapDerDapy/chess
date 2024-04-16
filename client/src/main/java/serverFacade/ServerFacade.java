@@ -193,5 +193,28 @@ public class ServerFacade {
         }
     }
 
+    public Result<Void> setGameState(int gameId, ChessGame game) {
+        String url = serverBaseUri + "/game/update/" + gameId;
+        String requestBody = new Gson().toJson(game); // Serialize your ChessGame object to JSON
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header("Authorization", authToken) // Assuming you use a bearer token for auth
+                .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() == 200) {
+                return Result.success();
+            } else {
+                return Result.failure("Failed to update game state: " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
+            Thread.currentThread().interrupt(); // Restore interrupted state
+            return Result.failure("Error while updating game state: " + e.getMessage());
+        }
+    }
 
 }

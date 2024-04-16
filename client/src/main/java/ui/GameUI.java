@@ -2,7 +2,9 @@ package ui;
 
 import chess.*;
 import com.google.gson.Gson;
-import webSocketMessages.userCommands.Leave;
+import serverFacade.Result;
+import serverFacade.ServerFacade;
+import webSocketMessages.userCommands.*;
 import websocket.WSClientEndpoint;
 
 import java.io.IOException;
@@ -68,7 +70,7 @@ public class GameUI {
         this.scanner = new Scanner(System.in);
         this.gameId = gameId;
         this.authToken = authToken;
-        this.wsClient = new WSClientEndpoint(endpointURI, this::updateGame);
+        this.wsClient = new WSClientEndpoint(endpointURI, this::updateGame, this::sendInitialMessage);
         this.wsClient.connect();
     }
 
@@ -85,6 +87,20 @@ public class GameUI {
     private void updateGame(ChessGame updatedGame) {
         this.game = updatedGame;
         redrawChessboard();  // Redraw the board with the updated game state
+    }
+    private void sendInitialMessage() {
+        if (userColor == null) {
+            JoinObserver command = new JoinObserver(authToken, gameId);
+            String message = new Gson().toJson(command);
+            sendWebSocketMessage(message);
+            System.out.println(ANSI_GREEN + "Observer Joined the game." + ANSI_RESET);
+        } else {
+            ChessGame.TeamColor playerColor = ChessGame.TeamColor.valueOf(userColor.toUpperCase());
+            JoinPlayer command = new JoinPlayer(authToken, gameId, playerColor);
+            String message = new Gson().toJson(command);
+            sendWebSocketMessage(message);
+            System.out.println(ANSI_GREEN + userColor + " Joined the game." + ANSI_RESET);
+        }
     }
 
     public void processUserInput() {
@@ -166,7 +182,10 @@ public class GameUI {
 
 
     private void resignGame() {
-
+        Resign command = new Resign(authToken, gameId);
+        String message = new Gson().toJson(command);
+        sendWebSocketMessage(message);
+        System.out.println(ANSI_GREEN + "Player Resigned." + ANSI_RESET);
     }
 
     private void makeMove() {
@@ -201,6 +220,11 @@ public class GameUI {
 
             ChessMove proposedMove = new ChessMove(startPosition, targetPosition, null);
             game.makeMove(proposedMove);
+
+            MakeMove command = new MakeMove(authToken, gameId, proposedMove);
+            String message = new Gson().toJson(command);
+            sendWebSocketMessage(message);
+            System.out.println(ANSI_GREEN + "Move made!" + ANSI_RESET);
 
             System.out.println("Move successful: " + startPosition + " to " + targetPosition);
         } catch (InvalidMoveException ime) {

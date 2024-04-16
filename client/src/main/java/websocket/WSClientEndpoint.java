@@ -16,13 +16,17 @@ public class WSClientEndpoint {
     private final URI endpointURI;
     private final Consumer<ChessGame> gameUpdateHandler;
     private final WebSocketContainer container;
+
+    private final Runnable onConnect;
+
     private static final int MAX_RECONNECT_ATTEMPTS = 3;
     private AtomicInteger reconnectAttempts = new AtomicInteger(0);
 
-    public WSClientEndpoint(URI endpointURI, Consumer<ChessGame> gameUpdateHandler) {
+    public WSClientEndpoint(URI endpointURI, Consumer<ChessGame> gameUpdateHandler, Runnable onConnect) {
         this.endpointURI = endpointURI;
         this.gameUpdateHandler = gameUpdateHandler;
         this.container = ContainerProvider.getWebSocketContainer();
+        this.onConnect = onConnect;
         connect();  // Automatically try to connect upon instantiation
     }
 

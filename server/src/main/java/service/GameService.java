@@ -113,6 +113,14 @@ public class GameService {
         return gameDAO.getPlayerColor(gameId, username);
     }
 
+    public boolean setChessGame(int gameId, ChessGame game){
+        return updateGameState(gameId, game);
+    }
+
+    public ChessGame getChessGame(int gameId){
+        return gameDAO.getGameState(gameId);
+    }
+
 
     public ChessGame getGame(int gameID) {
         try {
@@ -126,7 +134,6 @@ public class GameService {
             throw new RuntimeException("Failed to retrieve game: " + e.getMessage(), e);
         }
     }
-
 
 
 

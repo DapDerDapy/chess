@@ -333,6 +333,43 @@ public class  SQLGameDAO implements GameDAO {
         }
     }
 
+    @Override
+    public boolean updateChessGame(int gameId, ChessGame updatedGame) {
+        String sql = "UPDATE games SET game_state = ? WHERE game_id = ?;";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, new Gson().toJson(updatedGame)); // Serialize the updated game state to JSON
+            pstmt.setInt(2, gameId);
 
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0; // True if the update was successful
+        } catch (SQLException | DataAccessException e) {
+            e.printStackTrace(); // Log the SQL error here
+            return false;
+        }
+    }
+
+    @Override
+    public ChessGame getGameState(int gameId){
+        String sql = "SELECT game_state FROM games WHERE game_id = ?;";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, gameId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    String gameStateJson = rs.getString("game_state");
+                    if (gameStateJson != null) {
+                        return gson.fromJson(gameStateJson, ChessGame.class);
+                    } else {
+                        throw new DataAccessException("No game state available for game ID " + gameId);
+                    }
+                } else {
+                    throw new DataAccessException("Game with ID " + gameId + " not found.");
+                }
+            }
+        } catch (SQLException | DataAccessException e) {
+            throw new RuntimeException("SQL error occurred while retrieving game state: " + e.getMessage());
+        }
+    }
 
 }

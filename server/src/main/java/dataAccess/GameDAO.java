@@ -29,5 +29,7 @@ public interface GameDAO {
     String getGameStatus(int gameID);
 
     void updateGameStatus(int gameID, String status);
+    boolean updateChessGame(int gameId, ChessGame updatedGame);
+    ChessGame getGameState(int gameId);
     void clearAll();
 }

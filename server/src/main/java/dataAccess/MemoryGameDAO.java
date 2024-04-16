@@ -61,6 +61,16 @@ public class MemoryGameDAO implements GameDAO {
 
     }
 
+    @Override
+    public boolean updateChessGame(int gameId, ChessGame updatedGame) {
+        return false;
+    }
+
+    @Override
+    public ChessGame getGameState(int gameId) {
+        return null;
+    }
+
 
     public GameData getGame(int gameID) {
         Optional<GameData> match = gameInfo.stream()
